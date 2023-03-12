@@ -30,9 +30,12 @@ def command_info(args):
     print("subspy version: {}".format(__version__))
     commands.run_info(args)
 
-def command_export(args):
+def command_chs2cht(args):
     print("subspy version: {}".format(__version__))
-    logger.debug("called args: " + str(args))
+    commands.run_chs2cht(args)
+
+def command_rename(args):
+    print("subspy version: {}".format(__version__))
     commands.run_rename(args)
 
 def main():
@@ -91,6 +94,15 @@ def main():
         help="Create filename style.",
     )
 
+    # Parser for all chs<->cht related commands
+    parent_chs2cht = argparse.ArgumentParser(add_help=False)
+    parent_chs2cht.add_argument(
+        "--chs2cht-mode",
+        help="chs2cht|cht2chs",
+        choices=["chs2cht", "cht2chs"],
+        default="chs2cht",
+    )
+
     # Parser for all output formatting related flags shared by multiple
     # commands.
     parent_format = argparse.ArgumentParser(add_help=False)
@@ -121,19 +133,19 @@ def main():
     # Python argparse doesn't support grouping commands in subparsers as of
     # January 2021 :(. The best we can do now is order them logically.
 
+    chs2cht = subparser.add_parser(
+        "chs2cht",
+        parents=[parent, parent_chs2cht, parent_format],
+        help="chs2cht",
+    )
+    chs2cht.set_defaults(func=command_chs2cht)
+
     rename = subparser.add_parser(
         "rename",
         parents=[parent, parent_rename, parent_format],
         help="Rename the provided file",
     )
-    rename.set_defaults(func=command_export)
-
-    info = subparser.add_parser(
-        "info",
-        parents=[parent, parent_format],
-        help="Verbose information about the provided file",
-    )
-    info.set_defaults(func=command_info)
+    rename.set_defaults(func=command_rename)
 
     argcomplete.autocomplete(parser)
     args, unknown_args = parser.parse_known_args()

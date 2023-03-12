@@ -19,6 +19,10 @@ else:
 install_requires = [
     "argcomplete >= 1.8.2",
     "colorama >= 0.3.7",
+    "pysubs2 >= 1.6.0",
+    "chardet >= 3.0.4",
+    "translators >= 5.4.8",
+    "opencc-python-reimplemented @ git+https://github.com/yichen0831/opencc-python@master#egg=opencc-python-reimplemented",
 ]
 
 setup(
