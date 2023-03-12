@@ -26,14 +26,14 @@ logger = logging.getLogger(__name__)
 ################################################################################
 
 
-def command_export(args):
-    print("subspy version: {}".format(__version__))
-    logger.debug("called args: " + str(args))
-    commands.run_export(args)
-
 def command_info(args):
     print("subspy version: {}".format(__version__))
     commands.run_info(args)
+
+def command_export(args):
+    print("subspy version: {}".format(__version__))
+    logger.debug("called args: " + str(args))
+    commands.run_rename(args)
 
 def main():
     """
