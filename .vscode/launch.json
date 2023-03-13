@@ -7,7 +7,14 @@
             "request": "launch",
             "program": "subspy/main.py",
             "console": "integratedTerminal",
-            "args": ["conv", "-f=ass", "--in-dir=subspy/styles", "--out-dir=test"]
+            "args": [
+                "conv",
+                "--in-dir", "subspy/data",
+                "--out-dir", "test",
+                "-f", "ass",
+                "--ass-style", "1",
+                "--ass-style-mode", "builtin",
+            ]
         },
         {
             "name": "Python: Remote Attach",

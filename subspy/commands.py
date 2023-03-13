@@ -103,7 +103,8 @@ def run_conv(args):
     else:
         output_dir = path(args.out_dir)
 
-    in_format = args.in_format
+    in_format = "ass" if args.mode == 'ass2srt' else args.in_format
+    in_format = "srt" if args.mode == 'srt2ass' else in_format
     if in_format is None:
         logger.error("No input format found")
         sys.exit(1)
@@ -121,19 +122,30 @@ def run_conv(args):
     else:
         in_files = [path(in_file).absolute()]
 
-    logger.info(f"{input_dir}/*.{in_format}")
-    logger.info(f"{in_files}")
+    # subspy conv --in-dir subspy/data --out-dir test --mode ass2srt --ass-style 1 --ass-style-mode builtin
     if in_files:
         for _file in in_files:
             _in_file = _file
             out_file = output_dir / _file.name
+            out_file = out_file.with_suffix(f".{out_format}")
             subs = pysubs2.load(_in_file, encoding=guess_encoding(_in_file))
-            #subs.style = {"Default": pysubs2.SSAStyle.DEFAULT_STYLE.copy()}
-            new_style_file = path(SUBSPY_ROOT / 'styles' / 'style_sample.ssa')
-            new_subs_style = pysubs2.load(new_style_file, encoding=guess_encoding(new_style_file))
-            subs.style = new_subs_style.styles.copy()
-            #for style in subs_style.styles:
-            #    val = subs_style.styles[style]
+            if args.mode == 'srt2ass' and args.ass_style is not None:
+                new_style_file = path(args.ass_style)
+                if args.ass_style_mode == "builtin":
+                    n = int(args.ass_style)
+                    assert n<10 and n>0
+                    new_style_file = path(SUBSPY_ROOT / 'styles' / f'style_sample{n}.ass')
+                new_subs_style = pysubs2.load(new_style_file, encoding=guess_encoding(new_style_file))
+
+                if args.ass_style_mode == "merge":
+                    subs.import_styles(new_subs_style)
+                else:
+                    #subs.style = {"Default": pysubs2.SSAStyle.DEFAULT_STYLE.copy()}
+                    subs.styles = new_subs_style.styles.copy()
+
+            #for style in subs.styles:
+            #    val = subs.styles[style]
             #    pprint({field.name: getattr(val, field.name) for field in dataclasses.fields(val)})
             #    pprint(val)
             subs.save(out_file, format_=out_format)
+            logger.info(f"Processed {out_file} done.")

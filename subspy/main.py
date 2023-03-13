@@ -148,6 +148,19 @@ def main():
         default=None,
     )
 
+    # for srt2ass
+    parent_srt2ass = argparse.ArgumentParser(add_help=False)
+    parent_srt2ass.add_argument(
+        "--ass-style",
+        default=None,
+    )
+    parent_srt2ass.add_argument(
+        "--ass-style-mode",
+        help="merge|builtin|new",
+        choices=["merge", "builtin", "new"],
+        default='merge',
+    )
+
     # Support multiple commands for this tool
     subparser = parser.add_subparsers(title="Commands", metavar="")
 
@@ -172,7 +185,7 @@ def main():
 
     conv = subparser.add_parser(
         "conv",
-        parents=[parent, parent_conv, parent_format],
+        parents=[parent, parent_conv, parent_format, parent_srt2ass],
         help="conv",
     )
     conv.set_defaults(func=command_conv)
