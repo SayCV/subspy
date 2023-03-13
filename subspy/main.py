@@ -97,7 +97,7 @@ def main():
     # Parser for all chs<->cht related commands
     parent_chs2cht = argparse.ArgumentParser(add_help=False)
     parent_chs2cht.add_argument(
-        "--chs2cht-mode",
+        "--mode",
         help="chs2cht|cht2chs",
         choices=["chs2cht", "cht2chs"],
         default="chs2cht",
@@ -122,6 +122,14 @@ def main():
         metavar='FORMAT',
         help="srt|ass",
         choices=["srt", "ass"],
+        default=None,
+    )
+    parent_format.add_argument(
+        "--in-lang",
+        default=None,
+    )
+    parent_format.add_argument(
+        "--out-lang",
         default=None,
     )
 

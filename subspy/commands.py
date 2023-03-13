@@ -9,7 +9,7 @@ from pathlib import Path as path
 from opencc import OpenCC
 
 from .exceptions import SubspyException
-from .util import get_encoding
+from .util import guess_encoding, guess_lang
 
 logger = logging.getLogger(__name__)
 
@@ -36,26 +36,38 @@ def run_chs2cht(args):
     if out_format is None:
         out_format = in_format
 
+    in_lang = args.in_lang
+    if in_lang is None:
+        in_lang = guess_lang(input.name)
+
+    out_lang = args.out_lang
+    if out_lang is None:
+        if in_lang is None:
+            out_lang = "cht" if args.mode == 'chs2cht' else "chs"
+        elif "chs" in in_lang and args.mode == 'chs2cht':
+            out_lang = in_lang.replace('chs', 'cht')
+        elif "cht" in in_lang and args.mode == 'cht2chs':
+            out_lang = in_lang.replace('cht', 'chs')
+        elif "\u7B80" in in_lang and args.mode == 'chs2cht':
+            out_lang = in_lang.replace('\u7B80', '\u7E41')
+        elif "\u7E41" in in_lang and args.mode == 'cht2chs':
+            out_lang = in_lang.replace('\u7E41', '\u7B80')
+        else:
+            out_lang = "cht" if args.mode == 'chs2cht' else "chs"
+
     output = args.output
     if output is None:
-        in_lang = path(input.stem).suffix.lstrip('.')
         if in_lang is None:
-            output = input.parent / input.with_suffix(f".cht.{out_format}" if args.chs2cht_mode == 'chs2cht' else f".chs.{out_format}")
-        elif "chs" in in_lang:
-            in_lang = in_lang.replace('chs', 'cht')
-            output = input.parent / path(input.stem).with_suffix(f".{in_lang}.{out_format}")
-        elif "cht" in in_lang:
-            in_lang = in_lang.replace('cht', 'chs')
-            output = input.parent / path(input.stem).with_suffix(f".{in_lang}.{out_format}")
+            output = input.parent / input.with_suffix(f".{out_lang}.{out_format}")
         else:
-            output = input.parent / input.with_suffix(f".cht.{out_format}" if args.chs2cht_mode == 'chs2cht' else f".chs.{out_format}")
+            output = input.parent / path(input.stem).with_suffix(f".{out_lang}.{out_format}")
 
-    data: str = input.read_text(encoding=get_encoding(input), errors='ignore')
+    data: str = input.read_text(encoding=guess_encoding(input), errors='ignore')
     if not data:
         raise SubspyException(f"File `{input}` is empty")
  
     cc = OpenCC()
-    if args.chs2cht_mode == 'chs2cht':
+    if args.mode == 'chs2cht':
         cc.set_conversion('s2twp')
     else:
         cc.set_conversion('tw2sp')
