@@ -83,10 +83,7 @@ def run_chs2cht(args):
     out_file.write_text(result)
     logger.info(f'{out_file} done.')
 
-def run_rename(args):
-    logger.info(f"Rename Command Unimplemented!")
-
-def run_conv(args):
+def run_srt2ass(args):
     #parser = argparse.ArgumentParser()
     #args = parser.parse_args()
     if args.input is None and args.in_dir is None:
@@ -149,3 +146,9 @@ def run_conv(args):
             #    pprint(val)
             subs.save(out_file, format_=out_format)
             logger.info(f"Processed {out_file} done.")
+
+def run_trans(args):
+    logger.info(f"Trans Command Unimplemented!")
+
+def run_rename(args):
+    logger.info(f"Rename Command Unimplemented!")

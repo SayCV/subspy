@@ -38,9 +38,13 @@ def command_rename(args):
     print("subspy version: {}".format(__version__))
     commands.run_rename(args)
 
-def command_conv(args):
+def command_srt2ass(args):
     print("subspy version: {}".format(__version__))
-    commands.run_conv(args)
+    commands.run_srt2ass(args)
+
+def command_trans(args):
+    print("subspy version: {}".format(__version__))
+    commands.run_trans(args)
 
 def main():
     """
@@ -172,9 +176,23 @@ def main():
     chs2cht = subparser.add_parser(
         "chs2cht",
         parents=[parent, parent_conv, parent_format],
-        help="chs2cht",
+        help="Convert simplified chinese to traditional chinese or vice versa",
     )
     chs2cht.set_defaults(func=command_chs2cht)
+
+    srt2ass = subparser.add_parser(
+        "srt2ass",
+        parents=[parent, parent_conv, parent_format, parent_srt2ass],
+        help="Convert files to .ass from .srt or vice versa",
+    )
+    srt2ass.set_defaults(func=command_srt2ass)
+
+    trans = subparser.add_parser(
+        "trans",
+        parents=[parent, parent_conv, parent_format],
+        help="Translate to your language",
+    )
+    trans.set_defaults(func=command_trans)
 
     rename = subparser.add_parser(
         "rename",
@@ -182,13 +200,6 @@ def main():
         help="Rename the provided file",
     )
     rename.set_defaults(func=command_rename)
-
-    conv = subparser.add_parser(
-        "conv",
-        parents=[parent, parent_conv, parent_format, parent_srt2ass],
-        help="conv",
-    )
-    conv.set_defaults(func=command_conv)
 
     argcomplete.autocomplete(parser)
     args, unknown_args = parser.parse_known_args()
