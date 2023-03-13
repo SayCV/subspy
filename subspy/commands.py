@@ -3,15 +3,16 @@
 """
 
 import argparse
-from pprint import pprint
+import dataclasses
 import logging
 import sys
 from pathlib import Path as path
-import dataclasses
+from pprint import pprint
 
 import pysubs2
 from opencc import OpenCC
-from subspy.helpers import SUBSPY_ROOT
+
+from subspy.helpers import SUBSPY_ROOT, abbreviate_language
 
 from .exceptions import SubspyException
 from .util import guess_encoding, guess_lang
@@ -70,7 +71,7 @@ def run_chs2cht(args):
     data: str = input.read_text(encoding=guess_encoding(input), errors='ignore')
     if not data:
         raise SubspyException(f"File `{input}` is empty")
- 
+
     cc = OpenCC()
     if args.mode == 'chs2cht':
         cc.set_conversion('s2twp')
@@ -83,6 +84,7 @@ def run_chs2cht(args):
     out_file.write_text(result)
     logger.info(f'{out_file} done.')
 
+# subspy conv --in-dir data --out-dir test --mode ass2srt --ass-style 1 --ass-style-mode builtin
 def run_srt2ass(args):
     #parser = argparse.ArgumentParser()
     #args = parser.parse_args()
@@ -119,7 +121,6 @@ def run_srt2ass(args):
     else:
         in_files = [path(in_file).absolute()]
 
-    # subspy conv --in-dir subspy/data --out-dir test --mode ass2srt --ass-style 1 --ass-style-mode builtin
     if in_files:
         for _file in in_files:
             _in_file = _file
@@ -146,9 +147,97 @@ def run_srt2ass(args):
             #    pprint(val)
             subs.save(out_file, format_=out_format)
             logger.info(f"Processed {out_file} done.")
+    else:
+        logger.info(f'Not found **.{in_format} in {input_dir}.')
 
+# subspy trans --in-dir data --input *.eng.srt --output *.chs.srt --trans-engine=youdao
 def run_trans(args):
     logger.info(f"Trans Command Unimplemented!")
+    if args.input is None and args.in_dir is None:
+        logger.error("Please provide input file!")
+        sys.exit(1)
+    input = path(args.input).absolute()
+    if not input.exists() and args.in_dir is None:
+        logger.error("Input file non exist")
+        sys.exit(1)
+
+    if args.output is None and args.out_dir is None:
+        logger.error("Please provide output file!")
+        sys.exit(1)
+    output = path(args.output).absolute()
+
+    in_format = args.in_format
+    if in_format is None:
+        in_format = input.suffix.lstrip('.')
+    if in_format is None:
+        logger.error("No input format found")
+        sys.exit(1)
+
+    out_format = args.out_format
+    if out_format is None:
+        out_format = in_format
+
+    if args.in_dir is None:
+        input_dir = path.cwd()
+    else:
+        input_dir = path(args.in_dir)
+
+    if args.out_dir is None:
+        output_dir = path(args.in_dir)
+    else:
+        output_dir = path(args.out_dir)
+
+    in_lang = args.in_lang
+    if in_lang is None:
+        in_lang = guess_lang(input.name)
+    if in_lang is None:
+        in_lang = guess_lang(args.in_format)
+
+    out_lang = args.out_lang
+    if out_lang is None:
+        out_lang = guess_lang(output.name)
+    if in_lang is None:
+        out_lang = guess_lang(args.out_format)
+
+    assert in_lang is not None
+    assert out_lang is not None
+
+    in_files = []
+    if input_dir is not None:
+        for _file in input_dir.glob(f"*.{in_lang}.{in_format}"):
+            in_file: path = input_dir / _file.name
+            if in_file.is_file():
+                in_files.append(in_file)
+    else:
+        in_files = [path(in_file).absolute()]
+
+    if in_files:
+        import translators as ts
+        ts.preaccelerate()  # Optional. Caching sessions in advance, which can help improve access speed.
+        for _file in in_files:
+            if output is None:
+                if in_lang is None:
+                    output = input.parent / input.with_suffix(f".{out_lang}.{out_format}")
+                else:
+                    output = input.parent / path(input.stem).with_suffix(f".{out_lang}.{out_format}")
+
+            out_file = output
+            data: str = _file.read_text(encoding=guess_encoding(_file), errors='ignore')
+            if not data:
+                raise SubspyException(f"File `{input}` is empty")
+            query_text: str = data
+
+            translator: str = args.trans_engine
+            from_language: str = abbreviate_language(in_lang, engine = 'baidu')
+            to_language: str = abbreviate_language(out_lang, engine = 'baidu')
+
+            result = ts.translate_text(query_text, translator, from_language, to_language)
+
+            out_file.parent.mkdir(exist_ok=True)
+            out_file.write_text(result)
+            logger.info(f'{out_file} done.')
+    else:
+        logger.info(f'Not found *.{in_lang}.{in_format} in {input_dir}.')
 
 def run_rename(args):
     logger.info(f"Rename Command Unimplemented!")

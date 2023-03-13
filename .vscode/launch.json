@@ -2,18 +2,32 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File (Integrated Terminal)",
+            "name": "Python: Test conv",
             "type": "python",
             "request": "launch",
             "program": "subspy/main.py",
             "console": "integratedTerminal",
             "args": [
                 "conv",
-                "--in-dir", "subspy/data",
+                "--in-dir", "data",
                 "--out-dir", "test",
                 "-f", "ass",
                 "--ass-style", "1",
                 "--ass-style-mode", "builtin",
+            ]
+        },
+        {
+            "name": "Python: Test trans",
+            "type": "python",
+            "request": "launch",
+            "program": "subspy/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "trans",
+                "--in-dir", "data",
+                "--input", "*.eng.srt",
+                "--output", "*.chs.srt",
+                "--trans-engine", "youdao",
             ]
         },
         {

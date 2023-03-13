@@ -105,13 +105,6 @@ def main():
     # The top-level parser object
     parser = argparse.ArgumentParser(parents=[parent])
 
-    # Parser for all rename related commands
-    parent_rename = argparse.ArgumentParser(add_help=False)
-    parent_rename.add_argument(
-        "--filename-style",
-        help="Create filename style.",
-    )
-
     # Parser for all conv related commands
     parent_conv = argparse.ArgumentParser(add_help=False)
     parent_conv.add_argument(
@@ -165,6 +158,20 @@ def main():
         default='merge',
     )
 
+    # for trans
+    parent_trans = argparse.ArgumentParser(add_help=False)
+    parent_trans.add_argument(
+        "--trans-engine",
+        default='bing',
+    )
+
+    # Parser for all rename related commands
+    parent_rename = argparse.ArgumentParser(add_help=False)
+    parent_rename.add_argument(
+        "--filename-style",
+        help="Create filename style.",
+    )
+
     # Support multiple commands for this tool
     subparser = parser.add_subparsers(title="Commands", metavar="")
 
@@ -189,7 +196,7 @@ def main():
 
     trans = subparser.add_parser(
         "trans",
-        parents=[parent, parent_conv, parent_format],
+        parents=[parent, parent_trans, parent_format],
         help="Translate to your language",
     )
     trans.set_defaults(func=command_trans)
