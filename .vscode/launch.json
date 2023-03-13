@@ -31,6 +31,17 @@
             ]
         },
         {
+            "name": "Python: Test rename",
+            "type": "python",
+            "request": "launch",
+            "program": "subspy/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "rename",
+                "--in-dir", "data",
+            ]
+        },
+        {
             "name": "Python: Remote Attach",
             "type": "python",
             "request": "attach",

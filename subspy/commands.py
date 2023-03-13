@@ -213,7 +213,7 @@ def run_trans(args):
 
     if in_files:
         import translators as ts
-        ts.preaccelerate()  # Optional. Caching sessions in advance, which can help improve access speed.
+        # ts.preaccelerate()  # Optional. Caching sessions in advance, which can help improve access speed.
         for _file in in_files:
             if output is None:
                 if in_lang is None:
@@ -226,6 +226,7 @@ def run_trans(args):
             if not data:
                 raise SubspyException(f"File `{input}` is empty")
             query_text: str = data
+            # TODO -> Avoid the length of `query_text` exceeds the limit.
 
             translator: str = args.trans_engine
             from_language: str = abbreviate_language(in_lang, engine = 'baidu')
@@ -239,5 +240,6 @@ def run_trans(args):
     else:
         logger.info(f'Not found *.{in_lang}.{in_format} in {input_dir}.')
 
+# subspy rename --in-dir data
 def run_rename(args):
     logger.info(f"Rename Command Unimplemented!")

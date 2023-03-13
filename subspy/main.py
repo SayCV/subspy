@@ -171,6 +171,10 @@ def main():
         "--filename-style",
         help="Create filename style.",
     )
+    parent_rename.add_argument(
+        "--exclude",
+        help="Exclude files.",
+    )
 
     # Support multiple commands for this tool
     subparser = parser.add_subparsers(title="Commands", metavar="")
