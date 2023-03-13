@@ -2,11 +2,16 @@
 
 """
 
+import argparse
+from pprint import pprint
 import logging
 import sys
 from pathlib import Path as path
+import dataclasses
 
+import pysubs2
 from opencc import OpenCC
+from subspy.helpers import SUBSPY_ROOT
 
 from .exceptions import SubspyException
 from .util import guess_encoding, guess_lang
@@ -82,4 +87,53 @@ def run_rename(args):
     logger.info(f"Rename Command Unimplemented!")
 
 def run_conv(args):
-    logger.info(f"Conv Command Unimplemented!")
+    #parser = argparse.ArgumentParser()
+    #args = parser.parse_args()
+    if args.input is None and args.in_dir is None:
+        logger.error("No input file found")
+        sys.exit(1)
+
+    if args.in_dir is None:
+        input_dir = path.cwd()
+    else:
+        input_dir = path(args.in_dir)
+
+    if args.out_dir is None:
+        output_dir = path(args.in_dir)
+    else:
+        output_dir = path(args.out_dir)
+
+    in_format = args.in_format
+    if in_format is None:
+        logger.error("No input format found")
+        sys.exit(1)
+
+    out_format = args.out_format
+    if out_format is None:
+        out_format = "srt" if args.mode == 'ass2srt' else "ass"
+
+    in_files = []
+    if input_dir is not None:
+        for _file in input_dir.glob(f"*.{in_format}"):
+            in_file: path = input_dir / _file.name
+            if in_file.is_file():
+                in_files.append(in_file)
+    else:
+        in_files = [path(in_file).absolute()]
+
+    logger.info(f"{input_dir}/*.{in_format}")
+    logger.info(f"{in_files}")
+    if in_files:
+        for _file in in_files:
+            _in_file = _file
+            out_file = output_dir / _file.name
+            subs = pysubs2.load(_in_file, encoding=guess_encoding(_in_file))
+            #subs.style = {"Default": pysubs2.SSAStyle.DEFAULT_STYLE.copy()}
+            new_style_file = path(SUBSPY_ROOT / 'styles' / 'style_sample.ssa')
+            new_subs_style = pysubs2.load(new_style_file, encoding=guess_encoding(new_style_file))
+            subs.style = new_subs_style.styles.copy()
+            #for style in subs_style.styles:
+            #    val = subs_style.styles[style]
+            #    pprint({field.name: getattr(val, field.name) for field in dataclasses.fields(val)})
+            #    pprint(val)
+            subs.save(out_file, format_=out_format)

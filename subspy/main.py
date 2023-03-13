@@ -15,9 +15,9 @@ import sys
 
 import argcomplete
 
-from . import commands, helpers
-from ._version import __version__
-from .exceptions import SubspyException
+from subspy import commands, helpers
+from subspy._version import __version__
+from subspy.exceptions import SubspyException
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ def command_rename(args):
 
 def command_conv(args):
     print("subspy version: {}".format(__version__))
-    commands.run_run_conv(args)
+    commands.run_conv(args)
 
 def main():
     """
@@ -84,6 +84,16 @@ def main():
         help="Save file path",
         default=None,
     )
+    parent.add_argument(
+        "--in-dir",
+        help='Input directory',
+        required=False
+    )
+    parent.add_argument(
+        "--out-dir",
+        help='Output directory',
+        required=False
+    )
 
     # Get the list of arguments before any command
     before_command_args = parent.parse_known_args()
@@ -94,7 +104,7 @@ def main():
     # Parser for all rename related commands
     parent_rename = argparse.ArgumentParser(add_help=False)
     parent_rename.add_argument(
-        "--name-style",
+        "--filename-style",
         help="Create filename style.",
     )
 
