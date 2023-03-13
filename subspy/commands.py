@@ -80,3 +80,6 @@ def run_chs2cht(args):
 
 def run_rename(args):
     logger.info(f"Rename Command Unimplemented!")
+
+def run_conv(args):
+    logger.info(f"Conv Command Unimplemented!")

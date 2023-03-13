@@ -38,6 +38,10 @@ def command_rename(args):
     print("subspy version: {}".format(__version__))
     commands.run_rename(args)
 
+def command_conv(args):
+    print("subspy version: {}".format(__version__))
+    commands.run_run_conv(args)
+
 def main():
     """
     Read in command line arguments and call the correct command function.
@@ -94,13 +98,14 @@ def main():
         help="Create filename style.",
     )
 
-    # Parser for all chs<->cht related commands
-    parent_chs2cht = argparse.ArgumentParser(add_help=False)
-    parent_chs2cht.add_argument(
+    # Parser for all conv related commands
+    parent_conv = argparse.ArgumentParser(add_help=False)
+    parent_conv.add_argument(
         "--mode",
-        help="chs2cht|cht2chs",
-        choices=["chs2cht", "cht2chs"],
-        default="chs2cht",
+        metavar='MODEL',
+        help="srt2ass|ass2srt|chs2cht|cht2chs",
+        choices=["srt2ass", "ass2srt", "chs2cht", "cht2chs"],
+        default="srt2ass",
     )
 
     # Parser for all output formatting related flags shared by multiple
@@ -143,7 +148,7 @@ def main():
 
     chs2cht = subparser.add_parser(
         "chs2cht",
-        parents=[parent, parent_chs2cht, parent_format],
+        parents=[parent, parent_conv, parent_format],
         help="chs2cht",
     )
     chs2cht.set_defaults(func=command_chs2cht)
@@ -154,6 +159,13 @@ def main():
         help="Rename the provided file",
     )
     rename.set_defaults(func=command_rename)
+
+    conv = subparser.add_parser(
+        "conv",
+        parents=[parent, parent_conv, parent_format],
+        help="conv",
+    )
+    conv.set_defaults(func=command_conv)
 
     argcomplete.autocomplete(parser)
     args, unknown_args = parser.parse_known_args()
