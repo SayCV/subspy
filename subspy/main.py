@@ -164,6 +164,11 @@ def main():
         "--trans-engine",
         default='bing',
     )
+    parent_trans.add_argument(
+        "--both",
+        help="Save both subs file",
+        action="store_true",
+    )
 
     # Parser for all rename related commands
     parent_rename = argparse.ArgumentParser(add_help=False)

@@ -2,13 +2,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Test conv",
+            "name": "Python: Test srt2ass",
             "type": "python",
             "request": "launch",
             "program": "subspy/main.py",
             "console": "integratedTerminal",
             "args": [
-                "conv",
+                "srt2ass",
                 "--in-dir", "data",
                 "--out-dir", "test",
                 "-f", "ass",

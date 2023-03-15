@@ -81,7 +81,11 @@ def create_abbreviations_dictionary(languages=SUPPORTED_LANGUAGES):
     return {**short_dict, **verbose_dict}
 
 
-def abbreviate_language(language, engine = 'baidu'):
+def abbreviate_language(language, engine = 'bing'):
     language = language.lower()
     abbreviations = create_abbreviations_dictionary()
-    return abbreviations.get(language.lower())
+    lang_token = abbreviations.get(language.lower()).lower()
+    if engine == 'xx':
+        lang_token = abbreviations.get(language.lower())
+
+    return lang_token

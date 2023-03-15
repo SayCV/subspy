@@ -13,9 +13,10 @@ import pysubs2
 from opencc import OpenCC
 
 from subspy.helpers import SUBSPY_ROOT, abbreviate_language
+from subspy.translator import SubspyTranslator
 
 from .exceptions import SubspyException
-from .util import guess_encoding, guess_lang
+from .util import guess_encoding, guess_lang, filename_is_regex
 
 logger = logging.getLogger(__name__)
 
@@ -152,14 +153,13 @@ def run_srt2ass(args):
 
 # subspy trans --in-dir data --input *.eng.srt --output *.chs.srt --trans-engine=youdao
 def run_trans(args):
-    logger.info(f"Trans Command Unimplemented!")
     if args.input is None and args.in_dir is None:
         logger.error("Please provide input file!")
         sys.exit(1)
     input = path(args.input).absolute()
-    if not input.exists() and args.in_dir is None:
-        logger.error("Input file non exist")
-        sys.exit(1)
+    #if not input.exists() and args.in_dir is None:
+    #    logger.error("Input file non exist")
+    #    sys.exit(1)
 
     if args.output is None and args.out_dir is None:
         logger.error("Please provide output file!")
@@ -203,17 +203,15 @@ def run_trans(args):
     assert out_lang is not None
 
     in_files = []
-    if input_dir is not None:
+    if input_dir is not None and filename_is_regex(args.input):
         for _file in input_dir.glob(f"*.{in_lang}.{in_format}"):
             in_file: path = input_dir / _file.name
             if in_file.is_file():
                 in_files.append(in_file)
     else:
-        in_files = [path(in_file).absolute()]
+        in_files = [input]
 
     if in_files:
-        import translators as ts
-        # ts.preaccelerate()  # Optional. Caching sessions in advance, which can help improve access speed.
         for _file in in_files:
             if output is None:
                 if in_lang is None:
@@ -222,21 +220,45 @@ def run_trans(args):
                     output = input.parent / path(input.stem).with_suffix(f".{out_lang}.{out_format}")
 
             out_file = output
-            data: str = _file.read_text(encoding=guess_encoding(_file), errors='ignore')
-            if not data:
-                raise SubspyException(f"File `{input}` is empty")
-            query_text: str = data
+            if filename_is_regex(out_file):
+                out_file = output_dir / path(_file.name.replace(f".{in_lang}.{in_format}", f".{out_lang}.{out_format}"))
+            #data: str = _file.read_text(encoding=guess_encoding(_file), errors='ignore')
+            #if not data:
+            #    raise SubspyException(f"File `{input}` is empty")
+            #query_text: str = data
             # TODO -> Avoid the length of `query_text` exceeds the limit.
 
-            translator: str = args.trans_engine
-            from_language: str = abbreviate_language(in_lang, engine = 'baidu')
-            to_language: str = abbreviate_language(out_lang, engine = 'baidu')
+            text_list = []
+            subs = pysubs2.load(_file, encoding=guess_encoding(_file))
+            for event in subs.events:
+                text_list.append(event.plaintext.replace('\n', ' '))
 
-            result = ts.translate_text(query_text, translator, from_language, to_language)
+            sts = SubspyTranslator()
+
+            translator: str = args.trans_engine
+            from_language: str = abbreviate_language(in_lang, engine = '')
+            to_language: str = abbreviate_language(out_lang, engine = '')
+
+            translated_sen = sts.translate(text_list, translator, from_language, to_language)
+            translated_sen_list = translated_sen.split('\n')
+
+            if len(text_list) == len(translated_sen_list):
+                for i in range(len(text_list)):
+                    subs.events[i].plaintext = translated_sen_list[i]
+            else:
+                raise SubspyException(f"The length translated sen list is error")
 
             out_file.parent.mkdir(exist_ok=True)
-            out_file.write_text(result)
-            logger.info(f'{out_file} done.')
+            subs.save(out_file, format_=out_format)
+            logger.info(f"Processed {out_file} done.")
+
+            if args.both:
+                out_file = out_file.parent / out_file.name.replace(f".{out_lang}.{out_format}", f".{out_lang}+{in_lang}.{out_format}")
+                for i in range(len(text_list)):
+                    subs.events[i].plaintext = '\n'.join([translated_sen_list[i], text_list[i]])
+                out_file.parent.mkdir(exist_ok=True)
+                subs.save(out_file, format_=out_format)
+                logger.info(f"Processed {out_file} done.")
     else:
         logger.info(f'Not found *.{in_lang}.{in_format} in {input_dir}.')
 

@@ -1,3 +1,4 @@
+import re
 import chardet
 
 
@@ -30,3 +31,13 @@ def guess_lang(filename: str, delims = None):
     if count >=3:
         lang = fn_fields[count - 2]
     return lang
+
+def filename_is_regex(file: str) -> bool:
+    is_valid = False
+    try :
+        open(file, 'r')
+    except OSError as e:
+        if e.strerror == 'Invalid argument':
+            is_valid = True
+
+    return is_valid
