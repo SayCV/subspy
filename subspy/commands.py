@@ -13,7 +13,6 @@ import pysubs2
 from opencc import OpenCC
 
 from subspy.helpers import SUBSPY_ROOT, abbreviate_language
-from subspy.translator import SubspyTranslator
 
 from .exceptions import SubspyException
 from .util import guess_encoding, guess_lang, filename_is_regex
@@ -141,6 +140,7 @@ def run_srt2ass(args):
                 else:
                     #subs.style = {"Default": pysubs2.SSAStyle.DEFAULT_STYLE.copy()}
                     subs.styles = new_subs_style.styles.copy()
+            subs.info = new_subs_style.info.copy()
 
             #for style in subs.styles:
             #    val = subs.styles[style]
@@ -148,6 +148,18 @@ def run_srt2ass(args):
             #    pprint(val)
             subs.save(out_file, format_=out_format)
             logger.info(f"Processed {out_file} done.")
+
+            data: str = out_file.read_text(encoding=guess_encoding(out_file), errors='ignore')
+            in_lang = guess_lang(_in_file.name)
+            if in_lang:
+                dual_lang = in_lang.split('+')
+                if len(dual_lang) == 2:
+                    logger.info(f"Detected dual language: {in_lang}.")
+                    lines = []
+                    for line in data.split('\n'):
+                        lines.append(line.replace('\\N', "\\N{" + r'\r' + f"{dual_lang[1].upper()}" + "}"))
+                    out_file.write_text('\n'.join(lines), encoding=guess_encoding(out_file), errors='ignore')
+                    logger.info(f"Post processed {out_file} done.")
     else:
         logger.info(f'Not found **.{in_format} in {input_dir}.')
 
@@ -233,6 +245,7 @@ def run_trans(args):
             for event in subs.events:
                 text_list.append(event.plaintext.replace('\n', ' '))
 
+            from subspy.translator import SubspyTranslator
             sts = SubspyTranslator()
 
             translator: str = args.trans_engine
@@ -251,14 +264,6 @@ def run_trans(args):
             out_file.parent.mkdir(exist_ok=True)
             subs.save(out_file, format_=out_format)
             logger.info(f"Processed {out_file} done.")
-
-            if args.both:
-                out_file = out_file.parent / out_file.name.replace(f".{out_lang}.{out_format}", f".{out_lang}+{in_lang}.{out_format}")
-                for i in range(len(text_list)):
-                    subs.events[i].plaintext = '\n'.join([translated_sen_list[i], text_list[i]])
-                out_file.parent.mkdir(exist_ok=True)
-                subs.save(out_file, format_=out_format)
-                logger.info(f"Processed {out_file} done.")
     else:
         logger.info(f'Not found *.{in_lang}.{in_format} in {input_dir}.')
 
