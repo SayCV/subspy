@@ -10,7 +10,7 @@
             "args": [
                 "srt2ass",
                 "--in-dir", "data",
-                //"--out-dir", "test",
+                "--out-dir", "test",
                 "-f", "srt",
                 "-t", "ass",
                 "--ass-style", "1",

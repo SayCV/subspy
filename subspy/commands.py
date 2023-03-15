@@ -12,7 +12,7 @@ from pprint import pprint
 import pysubs2
 from opencc import OpenCC
 
-from subspy.helpers import SUBSPY_ROOT, abbreviate_language
+from subspy.helpers import SUBSPY_ROOT, abbreviate_language, auto_add_fontsize_to_subs_textline
 
 from .exceptions import SubspyException
 from .util import guess_encoding, guess_lang, filename_is_regex
@@ -158,7 +158,15 @@ def run_srt2ass(args):
                     lines = []
                     for line in data.split('\n'):
                         lines.append(line.replace('\\N', "\\N{" + r'\r' + f"{dual_lang[1].upper()}" + "}"))
-                    out_file.write_text('\n'.join(lines), encoding=guess_encoding(out_file), errors='ignore')
+                    subs_fixed = pysubs2.load(out_file, encoding=guess_encoding(out_file))
+                    for event in subs_fixed.events:
+                        if '\\N' in event.text:
+                            text = event.text.split('\\N')
+                            fs = auto_add_fontsize_to_subs_textline(text[0], args.video_type)
+                            if fs > 0:
+                                text0 = r"{\fs%d}%s" % (fs, text[0])
+                                event.text = '\\N'.join([text0, text[1]])
+                    subs_fixed.save(out_file, format_=out_format)
                     logger.info(f"Post processed {out_file} done.")
     else:
         logger.info(f'Not found **.{in_format} in {input_dir}.')

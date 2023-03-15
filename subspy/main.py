@@ -157,6 +157,12 @@ def main():
         choices=["merge", "builtin", "new"],
         default='merge',
     )
+    parent_srt2ass.add_argument(
+        "--video-type",
+        help="movie|tv",
+        choices=["movie", "tv"],
+        default='tv',
+    )
 
     # for trans
     parent_trans = argparse.ArgumentParser(add_help=False)
