@@ -41,8 +41,8 @@ class SubspyTranslator:
         translated = translated.replace('——', '-')
         translated = translated.replace('♬', '♪')
         translated = translated.replace('< / i >', '</i>')
-        translated = translated.replace('<我>', '<i>')
-        translated = translated.replace('</我>', '</i>')
+        translated = translated.replace('<\u6211>', '<i>')
+        translated = translated.replace('</\u6211>', '</i>')
         translated = translated.replace('\u6027\u4ea4', 'TMD')
         translated = translated.strip('\n')
         return translated
