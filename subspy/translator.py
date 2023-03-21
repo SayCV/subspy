@@ -1,6 +1,7 @@
-from typing import Iterator, List
-import translators as ts
 import time
+
+import translators as ts
+
 
 class SubspyTranslator:
     def __init__(self, engine='bing'):

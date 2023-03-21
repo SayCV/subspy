@@ -2,20 +2,19 @@
 
 """
 
-import argparse
-import dataclasses
 import logging
 import sys
 from pathlib import Path as path
-from pprint import pprint
 
 import pysubs2
 from opencc import OpenCC
 
-from subspy.helpers import SUBSPY_ROOT, abbreviate_language, auto_add_fontsize_to_subs_textline
+from subspy import rename
+from subspy.helpers import (SUBSPY_ROOT, abbreviate_language,
+                            auto_add_fontsize_to_subs_textline)
 
 from .exceptions import SubspyException
-from .util import guess_encoding, guess_lang, filename_is_regex
+from .util import filename_is_regex, guess_encoding, guess_lang
 
 logger = logging.getLogger(__name__)
 
@@ -278,3 +277,6 @@ def run_trans(args):
 # subspy rename --in-dir data
 def run_rename(args):
     logger.info(f"Rename Command Unimplemented!")
+    video_dir = None
+    subs_dir = None
+    rename.run(video_dir, subs_dir)

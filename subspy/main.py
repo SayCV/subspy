@@ -179,12 +179,19 @@ def main():
     # Parser for all rename related commands
     parent_rename = argparse.ArgumentParser(add_help=False)
     parent_rename.add_argument(
-        "--filename-style",
+        "--new-style",
         help="Create filename style.",
+        default=None,
+    )
+    parent_rename.add_argument(
+        "--origin-style",
+        help="Origin filename style.",
+        default=None,
     )
     parent_rename.add_argument(
         "--exclude",
         help="Exclude files.",
+        default=None,
     )
 
     # Support multiple commands for this tool
