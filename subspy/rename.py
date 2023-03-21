@@ -3,10 +3,13 @@
 
 import logging
 import mimetypes
-from pprint import pprint
 import re
 import sys
 from pathlib import Path as path
+from pprint import pprint
+
+from subspy.helpers import count_characters_chinese_english
+from subspy.util import guess_lang
 
 logger = logging.getLogger(__name__)
 
@@ -104,6 +107,26 @@ def guess_fields_from_subtitle(directory: path, recursive=False):
         results.append(_guess_video_filename_fields(filename))
     return results
 
+def guess_lang_from_subtitle(directory: path, recursive=False):
+    results = []
+    subs_files = find_subtitle_files(directory, recursive=False)
+
+    for filename in subs_files:
+        in_lang = guess_lang(filename.name)
+        if in_lang is None:
+            en_count, zh_cn_count, zh_tw_count = count_characters_chinese_english(filename)
+            lang = []
+            if en_count > 500:
+                lang.append('eng')
+            if zh_cn_count > 500:
+                lang.append('chs')
+            if zh_tw_count > 100:
+                lang.append('cht')
+            results.append('+'.join(lang))
+        else:
+            results.append(in_lang)
+    return results
+
 def run(video_dir: path, subs_dir: path, recursive=False):
     if video_dir is None:
         video_dir = path('videos')
@@ -114,11 +137,14 @@ def run(video_dir: path, subs_dir: path, recursive=False):
     if not subs_dir.exists():
         subs_dir = path.cwd()
 
-    f1 = guess_fields_from_video(video_dir)
-    f2 = guess_fields_from_subtitle(subs_dir)
-    pprint(f1)
+    fields_from_video = guess_fields_from_video(video_dir)
+    fields_from_subtitle = guess_fields_from_subtitle(subs_dir)
+    pprint(fields_from_video)
     print('\r\n\r\n')
-    pprint(f2)
+    pprint(fields_from_subtitle)
+    print('\r\n\r\n')
+    lang_from_subtitle = guess_lang_from_subtitle(subs_dir)
+    pprint(lang_from_subtitle)
 
 if __name__ == "__main__":
     video_dir = path('')

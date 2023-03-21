@@ -9,9 +9,13 @@ import math
 import string
 import sys
 from pathlib import Path as path
+from typing import Tuple
 
 import colorama
+import hanzidentifier
 import questionary
+
+from subspy.util import guess_encoding
 
 SUBSPY_ROOT = path(__file__).resolve().parent
 
@@ -167,3 +171,14 @@ def auto_add_fontsize_to_subs_textline(text: str, video_type: str) -> int:
         if line_str_len >= 3*17:
             ret = line_str_size
     return ret
+
+def count_characters_chinese_english(file: path) -> Tuple[int, int, int]:
+    text: str = file.read_text(encoding=guess_encoding(file), errors='ignore')
+    # 统计英文字符个数
+    en_count = sum([1 for char in text if char.isalpha()])
+    # 统计简体字符个数
+    zh_cn_count = sum([1 for char in text if hanzidentifier.is_simplified(char)])
+    # 统计繁体字符个数
+    zh_tw_count = sum([1 for char in text if hanzidentifier.is_traditional(char)]) - zh_cn_count
+
+    return en_count, zh_cn_count, zh_tw_count

@@ -21,6 +21,7 @@ install_requires = [
     "colorama >= 0.3.7",
     "pysubs2 >= 1.6.0",
     "chardet >= 3.0.4",
+    "hanzidentifier >= 1.1.0",
     "translators @ git+https://github.com/UlionTse/translators@master#egg=translators",
     "opencc-python-reimplemented @ git+https://github.com/yichen0831/opencc-python@master#egg=opencc-python-reimplemented",
 ]
