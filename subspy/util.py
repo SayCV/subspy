@@ -21,15 +21,23 @@ def guess_encoding(filename: str):
     return res['encoding']
 
 def guess_lang(filename: str, delims = None):
-    if delims is None:
-        delims = '.- '
-    fn_fields = string_split(filename, delims)
-
     lang = None
+    fn_fields = string_split(filename, '.')
+
     count = len(fn_fields)
     if count >=3:
         lang = fn_fields[count - 2]
-    return lang
+        if lang != '' and (lang in 'eng' or lang in 'chs' or lang in 'cht' or lang in 'chs+eng' or lang in 'cht+eng'):
+            return lang
+
+    fn_fields = string_split(filename, '-')
+    count = len(fn_fields)
+    if count >=3:
+        lang = fn_fields[count - 2]
+        if lang != '' and (lang in 'eng' or lang in 'chs' or lang in 'cht' or lang in 'chs+eng' or lang in 'cht+eng'):
+            return lang
+
+    return None
 
 def filename_is_regex(file: str) -> bool:
     is_valid = False

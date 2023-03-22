@@ -276,7 +276,17 @@ def run_trans(args):
 
 # subspy rename --in-dir data
 def run_rename(args):
-    logger.info(f"Rename Command Unimplemented!")
-    video_dir = None
-    subs_dir = None
-    rename.run(video_dir, subs_dir)
+
+    video_dir: path = None
+    subs_dir: path = None
+
+    if args.in_dir:
+        video_dir = path(args.in_dir)
+        subs_dir = video_dir / 'subs'
+
+    if video_dir is None:
+        video_dir = path('videos')
+    if subs_dir is None:
+        subs_dir = path('subs')
+
+    rename.run(args, video_dir, subs_dir)

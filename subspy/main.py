@@ -181,12 +181,12 @@ def main():
     parent_rename.add_argument(
         "--new-style",
         help="Create filename style.",
-        default=None,
+        #default=None,
     )
     parent_rename.add_argument(
-        "--origin-style",
-        help="Origin filename style.",
-        default=None,
+        "--name-pattern",
+        help="Origin filename pattern.",
+        #default=None,
     )
     parent_rename.add_argument(
         "--exclude",

@@ -39,7 +39,7 @@
             "console": "integratedTerminal",
             "args": [
                 "rename",
-                "--in-dir", "data",
+                //"--in-dir", "data",
                 "--debug",
             ]
         },
