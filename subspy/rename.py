@@ -71,7 +71,7 @@ def find_subtitle_files(directory: path, recursive=False):
     return sorted(results)
 
 
-def _guess_video_filename_fields(filename: path, pattern=None):
+def _guess_media_filename_fields(filename: path, pattern=None):
     logger.debug(f'Processing: {filename.name}')
     pattern = default_filename_pattern if pattern is None else pattern
     logger.debug(f'Used pattern: {pattern}')
@@ -106,8 +106,8 @@ def guess_fields_from_videos(directory: path, recursive=False):
     video_files = find_video_files(directory, recursive=False)
 
     for filename in video_files:
-        #_, video_season, video_episode, video_episode_name, video_extra = _guess_video_filename_fields(filename)
-        results.append(_guess_video_filename_fields(filename))
+        #_, video_season, video_episode, video_episode_name, video_extra = _guess_media_filename_fields(filename)
+        results.append(_guess_media_filename_fields(filename))
     return results
 
 
@@ -116,34 +116,11 @@ def guess_fields_from_subtitles(directory: path, recursive=False):
     subs_files = find_subtitle_files(directory, recursive=False)
 
     for filename in subs_files:
-        video_name, video_season, video_episode, video_episode_name, video_extra = _guess_video_filename_fields(
+        video_name, video_season, video_episode, video_episode_name, video_extra = _guess_media_filename_fields(
             filename)
         results.append((video_name, video_season, video_episode, video_episode_name, video_extra,
                        guess_lang_from_subtitle(filename)))
     return results
-
-
-def guess_lang_from_subtitles(directory: path, recursive=False):
-    results = []
-    subs_files = find_subtitle_files(directory, recursive=False)
-
-    for filename in subs_files:
-        in_lang = guess_lang(filename.name)
-        if in_lang is None:
-            en_count, zh_cn_count, zh_tw_count = count_characters_chinese_english(
-                filename)
-            lang = []
-            if zh_cn_count > 500:
-                lang.append('chs')
-            if zh_tw_count > 100:
-                lang.append('cht')
-            if en_count > 500:
-                lang.append('eng')
-            results.append('+'.join(lang))
-        else:
-            results.append(in_lang)
-    return results
-
 
 def guess_lang_from_subtitle(filename: path):
     results = None
@@ -164,6 +141,14 @@ def guess_lang_from_subtitle(filename: path):
         results = in_lang
     return results
 
+def guess_lang_from_subtitles(directory: path, recursive=False):
+    results = []
+    subs_files = find_subtitle_files(directory, recursive=False)
+
+    for filename in subs_files:
+        lang = guess_lang_from_subtitle(filename)
+        results.append(lang)
+    return results
 
 class video_series:
 
@@ -271,7 +256,7 @@ def run(args, video_dir: path, subs_dir: path, recursive=False):
             logger.warning(
                 f'Detected conflict video name `{list_fields[1]}` expected `{clz.video_season}` at {__file__} line {sys._getframe().f_lineno}\n')
 
-        def set_eps_lang(filename: path):
+        def _set_eps_lang(filename: path):
             if video_suffix in '.srt':
                 if in_lang == 'eng':
                     clz.video_episode[video_episode].srt.eng = filename
@@ -306,18 +291,19 @@ def run(args, video_dir: path, subs_dir: path, recursive=False):
         if video_episode_name != '':
             _filename = '.'.join([list_fields[0], 'S' + list_fields[1] + 'E' +
                                  video_episode, video_episode_name, video_extra, video_suffix.strip('.')])
+            if clz.video_episode[video_episode].name == '':
+                clz.video_episode[video_episode].name = video_episode_name
+            elif clz.video_episode[video_episode].name != video_episode_name:
+                logger.warning(
+                    f'Detected conflict episode name `{video_episode_name}` expected `{clz.video_episode[video_episode].name}` at {__file__} line {sys._getframe().f_lineno}\n')
         if video_episode not in clz.video_episode:
             clz.video_episode[video_episode] = clz.episode(
                 video_episode, video_episode_name, video_extra)
-            set_eps_lang(_filename)
+            _set_eps_lang(_filename)
         else:
-            set_eps_lang(_filename)
+            _set_eps_lang(_filename)
 
-    video_files: path = find_video_files(video_dir, recursive=False)
-    for file in video_files:
-        _, _, video_episode, _, _ = _guess_video_filename_fields(
-            file)
-        # new_filename_style = r"@VIDEO_NAME@.@VIDEO_SEASON@@VIDEO_EPISODE@.@VIDEO_EPISODE_NAME@.@VIDEO_EXTRA@"
+    def _get_new_filename():
         _filename = clz.new_style.replace('@VIDEO_NAME@', clz.video_name).replace('@VIDEO_SEASON@', 'S' + clz.video_season).replace(
             '@VIDEO_EPISODE@', 'E' + clz.video_episode[video_episode].number).replace(
                 '@VIDEO_EPISODE_NAME@', clz.video_episode[video_episode].name).replace(
@@ -327,9 +313,26 @@ def run(args, video_dir: path, subs_dir: path, recursive=False):
                 '@VIDEO_EPISODE@', 'E' + clz.video_episode[video_episode].number).replace(
                     '.@VIDEO_EPISODE_NAME@', '').replace(
                         '@VIDEO_EXTRA@', clz.video_episode[video_episode].extra)
-        
-        print(f"{_filename.strip('.')}{file.suffix}")
-        #file.rename(f"{_filename.strip('.')}{file.suffix}")
+        return _filename
+
+    video_files: path = find_video_files(video_dir, recursive=False)
+    for file in video_files:
+        _, _, video_episode, _, _ = _guess_media_filename_fields(
+            file)
+        _filename = _get_new_filename()
+        filename = f"{_filename.strip('.')}{file.suffix}"
+        print(f"{filename}")
+        # file.rename(f"{filename}")
+
+    subs_files: path = find_subtitle_files(video_dir, recursive=False)
+    for file in subs_files:
+        _, _, video_episode, _, _ = _guess_media_filename_fields(
+            file)
+        _lang = guess_lang_from_subtitle(file)
+        _filename = _get_new_filename()
+        filename = f"{_filename.strip('.')}.{_lang}{file.suffix}"
+        print(f"{filename}")
+        # file.rename(f"{filename}")
 
 
 if __name__ == "__main__":

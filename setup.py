@@ -22,8 +22,8 @@ install_requires = [
     "pysubs2 >= 1.6.0",
     "chardet >= 3.0.4",
     "hanzidentifier >= 1.1.0",
-    "translators @ git+https://github.com/UlionTse/translators@master#egg=translators",
-    "opencc-python-reimplemented @ git+https://github.com/yichen0831/opencc-python@master#egg=opencc-python-reimplemented",
+    "translators @ git+https://github.com/UlionTse/translators@cf07876b8d5f2b1acf9bcde42ce206898f8ffaf0#egg=translators",
+    "opencc-python-reimplemented @ git+https://github.com/yichen0831/opencc-python@b85452e384a3650109809fe5fefacb2ae4fe89d2#egg=opencc-python-reimplemented",
 ]
 
 setup(

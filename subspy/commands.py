@@ -290,3 +290,4 @@ def run_rename(args):
         subs_dir = path('subs')
 
     rename.run(args, video_dir, subs_dir)
+    logger.info(f'Rename files done.')
