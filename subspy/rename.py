@@ -291,9 +291,9 @@ def run(args, video_dir: path, subs_dir: path, recursive=False):
         if video_episode_name != '':
             _filename = '.'.join([list_fields[0], 'S' + list_fields[1] + 'E' +
                                  video_episode, video_episode_name, video_extra, video_suffix.strip('.')])
-            if clz.video_episode[video_episode].name == '':
+            if video_episode in clz.video_episode and clz.video_episode[video_episode].name == '':
                 clz.video_episode[video_episode].name = video_episode_name
-            elif clz.video_episode[video_episode].name != video_episode_name:
+            elif video_episode in clz.video_episode and clz.video_episode[video_episode].name != video_episode_name:
                 logger.warning(
                     f'Detected conflict episode name `{video_episode_name}` expected `{clz.video_episode[video_episode].name}` at {__file__} line {sys._getframe().f_lineno}\n')
         if video_episode not in clz.video_episode:
@@ -324,7 +324,7 @@ def run(args, video_dir: path, subs_dir: path, recursive=False):
         print(f"{filename}")
         # file.rename(f"{filename}")
 
-    subs_files: path = find_subtitle_files(video_dir, recursive=False)
+    subs_files: path = find_subtitle_files(subs_dir, recursive=False)
     for file in subs_files:
         _, _, video_episode, _, _ = _guess_media_filename_fields(
             file)
