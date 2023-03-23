@@ -321,8 +321,9 @@ def run(args, video_dir: path, subs_dir: path, recursive=False):
             file)
         _filename = _get_new_filename()
         filename = f"{_filename.strip('.')}{file.suffix}"
-        print(f"{filename}")
-        # file.rename(f"{filename}")
+        if file.name.lower() != filename.lower():
+            print(f"{file.name} --> {filename}")
+            file.rename(path.joinpath(file.parent, f"{filename}"))
 
     subs_files: path = find_subtitle_files(subs_dir, recursive=False)
     for file in subs_files:
@@ -331,8 +332,9 @@ def run(args, video_dir: path, subs_dir: path, recursive=False):
         _lang = guess_lang_from_subtitle(file)
         _filename = _get_new_filename()
         filename = f"{_filename.strip('.')}.{_lang}{file.suffix}"
-        print(f"{filename}")
-        # file.rename(f"{filename}")
+        if file.name.lower() != filename.lower():
+            print(f"{file.name} --> {filename}")
+            file.rename(path.joinpath(file.parent, f"{filename}"))
 
 
 if __name__ == "__main__":
