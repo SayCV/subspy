@@ -9,12 +9,35 @@
             "console": "integratedTerminal",
             "args": [
                 "srt2ass",
-                "--in-dir", "data",
-                "--out-dir", "test",
-                "-f", "srt",
-                "-t", "ass",
+                "--in-dir", "subs",
+                "--mode", "srt2ass",
                 "--ass-style", "1",
                 "--ass-style-mode", "builtin",
+            ]
+        },
+        {
+            "name": "Python: Test ass2srt",
+            "type": "python",
+            "request": "launch",
+            "program": "subspy/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "srt2ass",
+                "--in-dir", "subs",
+                "--mode", "ass2srt",
+            ]
+        },
+        {
+            "name": "Python: Test chs2cht",
+            "type": "python",
+            "request": "launch",
+            "program": "subspy/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "chs2cht",
+                "--in-dir", "subs",
+                "--input", "*.chs+eng.srt",
+                "--mode", "chs2cht",
             ]
         },
         {

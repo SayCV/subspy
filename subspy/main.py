@@ -179,6 +179,11 @@ def main():
     # Parser for all rename related commands
     parent_rename = argparse.ArgumentParser(add_help=False)
     parent_rename.add_argument(
+        "--name",
+        help="Provided the series name.",
+        #default=None,
+    )
+    parent_rename.add_argument(
         "--new-style",
         help="Create filename style.",
         #default=None,

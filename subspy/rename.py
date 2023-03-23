@@ -304,12 +304,13 @@ def run(args, video_dir: path, subs_dir: path, recursive=False):
             _set_eps_lang(_filename)
 
     def _get_new_filename():
-        _filename = clz.new_style.replace('@VIDEO_NAME@', clz.video_name).replace('@VIDEO_SEASON@', 'S' + clz.video_season).replace(
+        name = clz.video_name if args.name is None else args.name
+        _filename = clz.new_style.replace('@VIDEO_NAME@', name).replace('@VIDEO_SEASON@', 'S' + clz.video_season).replace(
             '@VIDEO_EPISODE@', 'E' + clz.video_episode[video_episode].number).replace(
                 '@VIDEO_EPISODE_NAME@', clz.video_episode[video_episode].name).replace(
                     '@VIDEO_EXTRA@', clz.video_episode[video_episode].extra)
         if clz.video_episode[video_episode].name == '':
-            _filename = clz.new_style.replace('@VIDEO_NAME@', clz.video_name).replace('@VIDEO_SEASON@', 'S' + clz.video_season).replace(
+            _filename = clz.new_style.replace('@VIDEO_NAME@', name).replace('@VIDEO_SEASON@', 'S' + clz.video_season).replace(
                 '@VIDEO_EPISODE@', 'E' + clz.video_episode[video_episode].number).replace(
                     '.@VIDEO_EPISODE_NAME@', '').replace(
                         '@VIDEO_EXTRA@', clz.video_episode[video_episode].extra)
