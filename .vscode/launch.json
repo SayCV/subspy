@@ -52,6 +52,7 @@
                 "--input", "*.eng.srt",
                 "--output", "*.chs.srt",
                 "--trans-engine", "youdao",
+                "--both",
             ]
         },
         {

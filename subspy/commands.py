@@ -288,6 +288,7 @@ def run_trans(args):
             data: str = _file.read_text(encoding=guess_encoding(_file), errors='ignore')
             #subs = pysubs2.load(_file, encoding=guess_encoding(_file))
             subs = pysubs2.SSAFile.from_string(data)
+            both_subs = pysubs2.SSAFile.from_string(data) if args.both else None
             for event in subs.events:
                 text_list.append(event.plaintext.replace('\n', ' '))
 
@@ -304,12 +305,20 @@ def run_trans(args):
             if len(text_list) == len(translated_sen_list):
                 for i in range(len(text_list)):
                     subs.events[i].plaintext = translated_sen_list[i]
+                    if both_subs and out_format == 'srt':
+                        both_subs.events[i].plaintext = f"{translated_sen_list[i]}\n{text_list[i]}"
             else:
                 raise SubspyException(f"The length translated sen list is error")
 
             out_file.parent.mkdir(exist_ok=True)
             subs.save(out_file, format_=out_format)
             logger.info(f"Processed {out_file} done.")
+
+            if both_subs:
+                both_out_file = output_dir / path(out_file.name.replace(f".{out_lang}.{out_format}", f".{out_lang}+{in_lang}.{out_format}"))
+                both_out_file.parent.mkdir(exist_ok=True)
+                both_subs.save(both_out_file, format_=out_format)
+                logger.info(f"Processed {both_out_file} done.")
     else:
         logger.info(f'Not found *.{in_lang}.{in_format} in {input_dir}.')
 
