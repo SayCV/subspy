@@ -314,7 +314,7 @@ def run_trans(args):
             subs.save(out_file, format_=out_format)
             logger.info(f"Processed {out_file} done.")
 
-            if both_subs:
+            if both_subs and out_format == 'srt':
                 both_out_file = output_dir / path(out_file.name.replace(f".{out_lang}.{out_format}", f".{out_lang}+{in_lang}.{out_format}"))
                 both_out_file.parent.mkdir(exist_ok=True)
                 both_subs.save(both_out_file, format_=out_format)
