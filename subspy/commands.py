@@ -218,10 +218,10 @@ def run_trans(args):
     #    logger.error("Input file non exist")
     #    sys.exit(1)
 
-    if args.output is None and args.out_dir is None:
-        logger.error("Please provide output file!")
-        sys.exit(1)
-    output = path(args.output).absolute()
+    #if args.output is None and args.out_dir is None:
+    #    logger.error("Please provide output file!")
+    #    sys.exit(1)
+    #output = path(args.output).absolute()
 
     in_format = args.in_format
     if in_format is None:
@@ -234,15 +234,8 @@ def run_trans(args):
     if out_format is None:
         out_format = in_format
 
-    if args.in_dir is None:
-        input_dir = path.cwd()
-    else:
-        input_dir = path(args.in_dir)
-
-    if args.out_dir is None:
-        output_dir = path(args.in_dir)
-    else:
-        output_dir = path(args.out_dir)
+    input_dir = path.cwd() if args.in_dir is None else path(args.in_dir)
+    output_dir = path(args.out_dir) if args.out_dir is None else path(args.in_dir)
 
     in_lang = args.in_lang
     if in_lang is None:
