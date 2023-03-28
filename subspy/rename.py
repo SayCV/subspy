@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 filename_delims = '.- '
 
-default_filename_pattern = r"(?P<p_video_name>.*)[\.\- ]+[sS](?P<p_video_season>\d\d)[\.\- ]?[eE](?P<p_video_episode>\d\d)[\.\- ]?(?P<p_video_episode_name>[,\^:^!\w.\-\'\(\)]*)[\.\- ]+(?P<p_video_extra>\d{3,5}p.*)"
+default_filename_pattern = r"(?P<p_video_name>.*)[\.\- ]+[sS](?P<p_video_season>\d\d)[\.\- ]?[eE](?P<p_video_episode>\d\d)[\.\- ]?(?P<p_video_episode_name>[, \^:^!\w.\-\'\(\)]*)[\.\- ]+(?P<p_video_extra>\d{3,5}p.*)"
 
 default_filename_style = r"@VIDEO_NAME@.@VIDEO_SEASON@@VIDEO_EPISODE@.@VIDEO_EPISODE_NAME@.@VIDEO_EXTRA@"
 
