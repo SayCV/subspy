@@ -11,9 +11,11 @@ import argparse
 import atexit
 import functools
 import logging
+import re
 import sys
 
 import argcomplete
+from pysubs2 import make_time
 
 from subspy import commands, helpers
 from subspy._version import __version__
@@ -25,6 +27,12 @@ logger = logging.getLogger(__name__)
 # Setup and parse command line arguments
 ################################################################################
 
+
+def time(s: str) -> int:
+    d = {}
+    for v, k in re.findall(r"(\d*\.?\d*)(ms|m|s|h)", s):
+        d[k] = float(v)
+    return make_time(**d)  # type: ignore  # Argument 1 has incomp. type "**Dict[Any, float]"; expected "Optional[int]"
 
 def command_info(args):
     print("subspy version: {}".format(__version__))
@@ -45,6 +53,10 @@ def command_srt2ass(args):
 def command_trans(args):
     print("subspy version: {}".format(__version__))
     commands.run_trans(args)
+
+def command_shift(args):
+    print("subspy version: {}".format(__version__))
+    commands.run_shift(args)
 
 def main():
     """
@@ -199,6 +211,19 @@ def main():
         default=None,
     )
 
+    # Parser for all shift related commands
+    parent_shift = argparse.ArgumentParser(add_help=False)
+    parent_shift.add_argument(
+        "--back",
+        metavar="TIME", type=time,
+        help="Delay all subtitles by given time amount. Time is specified like this: '1m30s', '0.5s', ..."
+    )
+    parent_shift.add_argument(
+        "--forward",
+        metavar="TIME", type=time,
+        help="The opposite of --shift (subtitles will appear sooner)."
+    )
+
     # Support multiple commands for this tool
     subparser = parser.add_subparsers(title="Commands", metavar="")
 
@@ -234,6 +259,13 @@ def main():
         help="Rename the provided file",
     )
     rename.set_defaults(func=command_rename)
+
+    shift = subparser.add_parser(
+        "shift",
+        parents=[parent, parent_shift, parent_format],
+        help="Shift time of the provided file",
+    )
+    shift.set_defaults(func=command_shift)
 
     argcomplete.autocomplete(parser)
     args, unknown_args = parser.parse_known_args()

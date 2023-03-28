@@ -160,8 +160,8 @@ def run_srt2ass(args):
             out_file = output_dir / _file.name
             out_file = out_file.with_suffix(f".{out_format}")
             data: str = _in_file.read_text(encoding=guess_encoding(_file), errors='ignore')
-            # subs = pysubs2.load(_in_file, encoding=guess_encoding(_in_file), errors='ignore')
             subs = pysubs2.SSAFile.from_string(data)
+            # subs = pysubs2.load(_in_file, encoding=guess_encoding(_in_file), errors='ignore')
             if args.mode == 'srt2ass' and args.ass_style is not None:
                 new_style_file = path(args.ass_style)
                 if args.ass_style_mode == "builtin":
@@ -235,7 +235,7 @@ def run_trans(args):
         out_format = in_format
 
     input_dir = path.cwd() if args.in_dir is None else path(args.in_dir)
-    output_dir = path(args.out_dir) if args.out_dir is None else path(args.in_dir)
+    output_dir = path(args.in_dir) if args.out_dir is None else path(args.out_dir)
 
     in_lang = args.in_lang
     if in_lang is None:
@@ -279,8 +279,8 @@ def run_trans(args):
 
             text_list = []
             data: str = _file.read_text(encoding=guess_encoding(_file), errors='ignore')
-            #subs = pysubs2.load(_file, encoding=guess_encoding(_file))
             subs = pysubs2.SSAFile.from_string(data)
+            #subs = pysubs2.load(_file, encoding=guess_encoding(_file))
             both_subs = pysubs2.SSAFile.from_string(data) if args.both else None
             for event in subs.events:
                 text_list.append(event.plaintext.replace('\n', ' '))
@@ -332,3 +332,58 @@ def run_rename(args):
 
     rename.run(args, video_dir, subs_dir)
     logger.info(f'Rename files done.')
+
+def run_shift(args):
+    logger.info(f"Shift Command Starting...")
+    if args.input is None and args.in_dir is None:
+        logger.error("Please provide input file!")
+        sys.exit(1)
+    input = path(args.input).absolute()
+
+    in_format = args.in_format
+    if in_format is None:
+        in_format = input.suffix.lstrip('.')
+    if in_format is None:
+        logger.error("No input format found")
+        sys.exit(1)
+
+    out_format = args.out_format
+    if out_format is None:
+        out_format = in_format
+
+    input_dir = path.cwd() if args.in_dir is None else path(args.in_dir)
+    output_dir = path(args.in_dir) if args.out_dir is None else path(args.out_dir)
+
+    in_files = []
+    if input_dir is not None and filename_is_regex(args.input):
+        for _file in input_dir.glob(f"*.{in_format}"):
+            in_file: path = input_dir / _file.name
+            if in_file.is_file():
+                in_files.append(in_file)
+    else:
+        in_files = [input]
+
+    if in_files:
+        for _file in in_files:
+            output = _file.parent / _file.with_suffix(f".{out_format}")
+
+            out_file = output
+            if filename_is_regex(out_file):
+                out_file = output_dir / path(_file.name.replace(f".{in_format}", f".{out_format}"))
+
+            data: str = _file.read_text(encoding=guess_encoding(_file), errors='ignore')
+            subs = pysubs2.SSAFile.from_string(data)
+            #subs = pysubs2.load(_file, encoding=guess_encoding(_file))
+
+            if args.forward is not None:
+                subs.shift(ms=args.forward)
+                logger.info(f"Processed forward {args.forward} to {out_file} done.")
+            elif args.back is not None:
+                subs.shift(ms=-args.back)
+                logger.info(f"Processed back {args.back} to {out_file} done.")
+
+            out_file.parent.mkdir(exist_ok=True)
+            subs.save(out_file, format_=out_format)
+            logger.info(f"Processed {out_file} done.")
+    else:
+        logger.info(f'Not found *.{in_format} in {input_dir}.')
