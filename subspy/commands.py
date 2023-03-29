@@ -406,8 +406,8 @@ def run_dual(args):
     input_dir = path.cwd() if args.in_dir is None else path(args.in_dir)
     output_dir = path(args.in_dir) if args.out_dir is None else path(args.out_dir)
 
-    top_lang = guess_lang(args.top.name)
-    bot_lang = guess_lang(args.bot.name)
+    top_lang = guess_lang(args.top)
+    bot_lang = guess_lang(args.bot)
 
     assert top_lang is not None
     assert bot_lang is not None
@@ -416,7 +416,7 @@ def run_dual(args):
 
     in_format = args.in_format
     if in_format is None:
-        in_format = args.top.suffix.lstrip('.')
+        in_format = path(args.top).suffix.lstrip('.')
     if in_format is None:
         logger.error("No input format found")
         sys.exit(1)
