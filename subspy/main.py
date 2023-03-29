@@ -58,6 +58,10 @@ def command_shift(args):
     print("subspy version: {}".format(__version__))
     commands.run_shift(args)
 
+def command_dual(args):
+    print("subspy version: {}".format(__version__))
+    commands.run_dual(args)
+
 def main():
     """
     Read in command line arguments and call the correct command function.
@@ -224,6 +228,19 @@ def main():
         help="The opposite of --shift (subtitles will appear sooner)."
     )
 
+    # Parser for all bilingual related commands
+    parent_dual = argparse.ArgumentParser(add_help=False)
+    parent_dual.add_argument(
+        "--top",
+        metavar="Top srt file",
+        help="Top bilingual subtitles."
+    )
+    parent_dual.add_argument(
+        "--bot",
+        metavar="Bot srt file",
+        help="Bot bilingual subtitles."
+    )
+
     # Support multiple commands for this tool
     subparser = parser.add_subparsers(title="Commands", metavar="")
 
@@ -266,6 +283,13 @@ def main():
         help="Shift time of the provided file",
     )
     shift.set_defaults(func=command_shift)
+
+    dual = subparser.add_parser(
+        "dual",
+        parents=[parent, parent_dual, parent_format],
+        help="Creating top/bottom bilingual subtitles",
+    )
+    dual.set_defaults(func=command_dual)
 
     argcomplete.autocomplete(parser)
     args, unknown_args = parser.parse_known_args()

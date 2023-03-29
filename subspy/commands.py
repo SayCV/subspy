@@ -387,3 +387,80 @@ def run_shift(args):
             logger.info(f"Processed {out_file} done.")
     else:
         logger.info(f'Not found *.{in_format} in {input_dir}.')
+
+def run_dual(args):
+    logger.info(f"Creating bilingual subtitles starting...")
+    if args.input is None and args.in_dir is None:
+        logger.error("Please provide input file!")
+        sys.exit(1)
+    input = path(args.input).absolute() if args.input else None
+
+    if args.top is None:
+        logger.error("No provided the top subtitle")
+        sys.exit(1)
+
+    if args.bot is None:
+        logger.error("No provided the bottom subtitle")
+        sys.exit(1)
+
+    input_dir = path.cwd() if args.in_dir is None else path(args.in_dir)
+    output_dir = path(args.in_dir) if args.out_dir is None else path(args.out_dir)
+
+    top_lang = guess_lang(args.top.name)
+    bot_lang = guess_lang(args.bot.name)
+
+    assert top_lang is not None
+    assert bot_lang is not None
+
+    dual_lang = top_lang + '+' + bot_lang
+
+    in_format = args.in_format
+    if in_format is None:
+        in_format = args.top.suffix.lstrip('.')
+    if in_format is None:
+        logger.error("No input format found")
+        sys.exit(1)
+
+    out_format = args.out_format
+    if out_format is None:
+        out_format = in_format
+
+    in_files = []
+    if input_dir is not None and filename_is_regex(args.top):
+        for _file in input_dir.glob(f"{args.top}"):
+            in_file: path = input_dir / _file.name
+            if in_file.is_file():
+                in_files.append(in_file)
+    else:
+        in_files = [input]
+
+    if in_files:
+        for top_file in in_files:
+            bot_file = input_dir / path(top_file.name.replace(f".{top_lang}.{in_format}", f".{bot_lang}.{in_format}"))
+
+            data: str = top_file.read_text(encoding=guess_encoding(top_file), errors='ignore')
+            subs_top = pysubs2.SSAFile.from_string(data)
+            data: str = bot_file.read_text(encoding=guess_encoding(bot_file), errors='ignore')
+            subs_bot = pysubs2.SSAFile.from_string(data)
+
+            subs = pysubs2.SSAFile()
+            subs.styles = {
+                "bottom": pysubs2.SSAStyle(alignment=pysubs2.Alignment.BOTTOM_CENTER),
+                "top": pysubs2.SSAStyle(alignment=pysubs2.Alignment.TOP_CENTER),
+            }
+            for e in subs_bot:
+                e.style = "bottom"
+                subs.append(e)
+            for e in subs_top:
+                e.style = "top"
+                subs.append(e)
+
+            out_file = output_dir / path(top_file.name.replace(f".{top_lang}.{in_format}", f".{dual_lang}.srt"))
+            out_file.parent.mkdir(exist_ok=True)
+            subs.save(out_file, format_='srt')
+            logger.info(f'Creating bilingual subtitles({out_file}) done.')
+            out_file = output_dir / path(top_file.name.replace(f".{top_lang}.{in_format}", f".{dual_lang}.ass"))
+            subs.save(out_file, format_='ass')
+            logger.info(f'Creating bilingual subtitles({out_file}) done.')
+    else:
+        logger.info(f'Not found {args.top} in {input_dir}.')
