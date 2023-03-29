@@ -18,8 +18,10 @@ from .util import filename_is_regex, guess_encoding, guess_lang
 
 logger = logging.getLogger(__name__)
 
+
 def run_info(args):
     logger.info(f"Info Command Unimplemented!")
+
 
 def run_chs2cht(args):
     logger.info(f"Chs2cht Command Starting...")
@@ -28,7 +30,7 @@ def run_chs2cht(args):
         sys.exit(1)
     input = path(args.input).absolute()
 
-    #if args.output is None and args.out_dir is None:
+    # if args.output is None and args.out_dir is None:
     #    logger.error("Please provide output file!")
     #    sys.exit(1)
     output = path(args.output).absolute() if args.output is not None else None
@@ -90,15 +92,20 @@ def run_chs2cht(args):
     if in_files:
         for _file in in_files:
             if in_lang is None:
-                output = _file.parent / _file.with_suffix(f".{out_lang}.{out_format}")
+                output = _file.parent / \
+                    _file.with_suffix(f".{out_lang}.{out_format}")
             else:
-                output = _file.parent / path(_file.stem).with_suffix(f".{out_lang}.{out_format}")
+                output = _file.parent / \
+                    path(_file.stem).with_suffix(f".{out_lang}.{out_format}")
 
             out_file = output
             if filename_is_regex(out_file):
-                out_file = output_dir / path(_file.name.replace(f".{in_lang}.{in_format}", f".{out_lang}.{out_format}"))
-            
-            data: str = _file.read_text(encoding=guess_encoding(_file), errors='ignore')
+                out_file = output_dir / \
+                    path(_file.name.replace(
+                        f".{in_lang}.{in_format}", f".{out_lang}.{out_format}"))
+
+            data: str = _file.read_text(
+                encoding=guess_encoding(_file), errors='ignore')
             if not data:
                 raise SubspyException(f"File `{_file}` is empty")
 
@@ -117,6 +124,8 @@ def run_chs2cht(args):
         logger.info(f'Not found *.{in_lang}.{in_format} in {input_dir}.')
 
 # subspy srt2ass --in-dir data --out-dir test --mode ass2srt --ass-style 1 --ass-style-mode builtin
+
+
 def run_srt2ass(args):
     logger.info(f"Srt2ass Command Starting...")
     #parser = argparse.ArgumentParser()
@@ -159,16 +168,19 @@ def run_srt2ass(args):
             _in_file = _file
             out_file = output_dir / _file.name
             out_file = out_file.with_suffix(f".{out_format}")
-            data: str = _in_file.read_text(encoding=guess_encoding(_file), errors='ignore')
+            data: str = _in_file.read_text(
+                encoding=guess_encoding(_file), errors='ignore')
             subs = pysubs2.SSAFile.from_string(data)
             # subs = pysubs2.load(_in_file, encoding=guess_encoding(_in_file), errors='ignore')
             if args.mode == 'srt2ass' and args.ass_style is not None:
                 new_style_file = path(args.ass_style)
                 if args.ass_style_mode == "builtin":
                     n = int(args.ass_style)
-                    assert n<10 and n>0
-                    new_style_file = path(SUBSPY_ROOT / 'styles' / f'style_sample{n}.ass')
-                new_subs_style = pysubs2.load(new_style_file, encoding=guess_encoding(new_style_file))
+                    assert n < 10 and n > 0
+                    new_style_file = path(
+                        SUBSPY_ROOT / 'styles' / f'style_sample{n}.ass')
+                new_subs_style = pysubs2.load(
+                    new_style_file, encoding=guess_encoding(new_style_file))
 
                 if args.ass_style_mode == "merge":
                     subs.import_styles(new_subs_style)
@@ -177,14 +189,15 @@ def run_srt2ass(args):
                     subs.styles = new_subs_style.styles.copy()
                 subs.info = new_subs_style.info.copy()
 
-            #for style in subs.styles:
+            # for style in subs.styles:
             #    val = subs.styles[style]
             #    pprint({field.name: getattr(val, field.name) for field in dataclasses.fields(val)})
             #    pprint(val)
             subs.save(out_file, format_=out_format)
             logger.info(f"Processed {out_file} done.")
 
-            data: str = out_file.read_text(encoding=guess_encoding(out_file), errors='ignore')
+            data: str = out_file.read_text(
+                encoding=guess_encoding(out_file), errors='ignore')
             in_lang = guess_lang(_in_file.name)
             if in_lang:
                 dual_lang = in_lang.split('+')
@@ -192,13 +205,17 @@ def run_srt2ass(args):
                     logger.info(f"Detected dual language: {in_lang}.")
                     lines = []
                     for line in data.split('\n'):
-                        lines.append(line.replace('\\N', "\\N{" + r'\r' + f"{dual_lang[1].upper()}" + "}"))
-                    out_file.write_text('\n'.join(lines), encoding=guess_encoding(out_file), errors='ignore')
-                subs_fixed = pysubs2.load(out_file, encoding=guess_encoding(out_file))
+                        lines.append(line.replace(
+                            '\\N', "\\N{" + r'\r' + f"{dual_lang[1].upper()}" + "}"))
+                    out_file.write_text('\n'.join(lines), encoding=guess_encoding(
+                        out_file), errors='ignore')
+                subs_fixed = pysubs2.load(
+                    out_file, encoding=guess_encoding(out_file))
                 for event in subs_fixed.events:
                     if '\\N' in event.text:
                         text = event.text.split('\\N')
-                        fs = auto_add_fontsize_to_subs_textline(text[0], args.video_type)
+                        fs = auto_add_fontsize_to_subs_textline(
+                            text[0], args.video_type)
                         if fs > 0:
                             text0 = r"{\fs%d}%s" % (fs, text[0])
                             event.text = '\\N'.join([text0, text[1]])
@@ -208,17 +225,19 @@ def run_srt2ass(args):
         logger.info(f'Not found **.{in_format} in {input_dir}.')
 
 # subspy trans --in-dir data --input *.eng.srt --output *.chs.srt --trans-engine=youdao
+
+
 def run_trans(args):
     logger.info(f"Trans Command Starting...")
     if args.input is None and args.in_dir is None:
         logger.error("Please provide input file!")
         sys.exit(1)
     input = path(args.input).absolute()
-    #if not input.exists() and args.in_dir is None:
+    # if not input.exists() and args.in_dir is None:
     #    logger.error("Input file non exist")
     #    sys.exit(1)
 
-    #if args.output is None and args.out_dir is None:
+    # if args.output is None and args.out_dir is None:
     #    logger.error("Please provide output file!")
     #    sys.exit(1)
     #output = path(args.output).absolute()
@@ -235,7 +254,8 @@ def run_trans(args):
         out_format = in_format
 
     input_dir = path.cwd() if args.in_dir is None else path(args.in_dir)
-    output_dir = path(args.in_dir) if args.out_dir is None else path(args.out_dir)
+    output_dir = path(
+        args.in_dir) if args.out_dir is None else path(args.out_dir)
 
     in_lang = args.in_lang
     if in_lang is None:
@@ -264,24 +284,30 @@ def run_trans(args):
     if in_files:
         for _file in in_files:
             if in_lang is None:
-                output = _file.parent / _file.with_suffix(f".{out_lang}.{out_format}")
+                output = _file.parent / \
+                    _file.with_suffix(f".{out_lang}.{out_format}")
             else:
-                output = _file.parent / path(_file.stem).with_suffix(f".{out_lang}.{out_format}")
+                output = _file.parent / \
+                    path(_file.stem).with_suffix(f".{out_lang}.{out_format}")
 
             out_file = output
             if filename_is_regex(out_file):
-                out_file = output_dir / path(_file.name.replace(f".{in_lang}.{in_format}", f".{out_lang}.{out_format}"))
+                out_file = output_dir / \
+                    path(_file.name.replace(
+                        f".{in_lang}.{in_format}", f".{out_lang}.{out_format}"))
             #data: str = _file.read_text(encoding=guess_encoding(_file), errors='ignore')
-            #if not data:
+            # if not data:
             #    raise SubspyException(f"File `{input}` is empty")
             #query_text: str = data
             # TODO -> Avoid the length of `query_text` exceeds the limit.
 
             text_list = []
-            data: str = _file.read_text(encoding=guess_encoding(_file), errors='ignore')
+            data: str = _file.read_text(
+                encoding=guess_encoding(_file), errors='ignore')
             subs = pysubs2.SSAFile.from_string(data)
             #subs = pysubs2.load(_file, encoding=guess_encoding(_file))
-            both_subs = pysubs2.SSAFile.from_string(data) if args.both else None
+            both_subs = pysubs2.SSAFile.from_string(
+                data) if args.both else None
             for event in subs.events:
                 text_list.append(event.plaintext.replace('\n', ' '))
 
@@ -289,10 +315,11 @@ def run_trans(args):
             sts = SubspyTranslator()
 
             translator: str = args.trans_engine
-            from_language: str = abbreviate_language(in_lang, engine = '')
-            to_language: str = abbreviate_language(out_lang, engine = '')
+            from_language: str = abbreviate_language(in_lang, engine='')
+            to_language: str = abbreviate_language(out_lang, engine='')
 
-            translated_sen = sts.translate(text_list, translator, from_language, to_language)
+            translated_sen = sts.translate(
+                text_list, translator, from_language, to_language)
             translated_sen_list = translated_sen.split('\n')
 
             if len(text_list) == len(translated_sen_list):
@@ -301,14 +328,17 @@ def run_trans(args):
                     if both_subs and out_format == 'srt':
                         both_subs.events[i].plaintext = f"{translated_sen_list[i]}\n{text_list[i]}"
             else:
-                raise SubspyException(f"The length translated sen list is error")
+                raise SubspyException(
+                    f"The length translated sen list is error")
 
             out_file.parent.mkdir(exist_ok=True)
             subs.save(out_file, format_=out_format)
             logger.info(f"Processed {out_file} done.")
 
             if both_subs and out_format == 'srt':
-                both_out_file = output_dir / path(out_file.name.replace(f".{out_lang}.{out_format}", f".{out_lang}+{in_lang}.{out_format}"))
+                both_out_file = output_dir / \
+                    path(out_file.name.replace(
+                        f".{out_lang}.{out_format}", f".{out_lang}+{in_lang}.{out_format}"))
                 both_out_file.parent.mkdir(exist_ok=True)
                 both_subs.save(both_out_file, format_=out_format)
                 logger.info(f"Processed {both_out_file} done.")
@@ -316,6 +346,8 @@ def run_trans(args):
         logger.info(f'Not found *.{in_lang}.{in_format} in {input_dir}.')
 
 # subspy rename --in-dir data
+
+
 def run_rename(args):
     logger.info(f"Rename Command Starting...")
     video_dir: path = None
@@ -332,6 +364,7 @@ def run_rename(args):
 
     rename.run(args, video_dir, subs_dir)
     logger.info(f'Rename files done.')
+
 
 def run_shift(args):
     logger.info(f"Shift Command Starting...")
@@ -352,7 +385,8 @@ def run_shift(args):
         out_format = in_format
 
     input_dir = path.cwd() if args.in_dir is None else path(args.in_dir)
-    output_dir = path(args.in_dir) if args.out_dir is None else path(args.out_dir)
+    output_dir = path(
+        args.in_dir) if args.out_dir is None else path(args.out_dir)
 
     in_files = []
     if input_dir is not None and filename_is_regex(args.input):
@@ -369,15 +403,18 @@ def run_shift(args):
 
             out_file = output
             if filename_is_regex(out_file):
-                out_file = output_dir / path(_file.name.replace(f".{in_format}", f".{out_format}"))
+                out_file = output_dir / \
+                    path(_file.name.replace(f".{in_format}", f".{out_format}"))
 
-            data: str = _file.read_text(encoding=guess_encoding(_file), errors='ignore')
+            data: str = _file.read_text(
+                encoding=guess_encoding(_file), errors='ignore')
             subs = pysubs2.SSAFile.from_string(data)
             #subs = pysubs2.load(_file, encoding=guess_encoding(_file))
 
             if args.forward is not None:
                 subs.shift(ms=args.forward)
-                logger.info(f"Processed forward {args.forward} to {out_file} done.")
+                logger.info(
+                    f"Processed forward {args.forward} to {out_file} done.")
             elif args.back is not None:
                 subs.shift(ms=-args.back)
                 logger.info(f"Processed back {args.back} to {out_file} done.")
@@ -387,6 +424,7 @@ def run_shift(args):
             logger.info(f"Processed {out_file} done.")
     else:
         logger.info(f'Not found *.{in_format} in {input_dir}.')
+
 
 def run_dual(args):
     logger.info(f"Creating bilingual subtitles starting...")
@@ -404,7 +442,8 @@ def run_dual(args):
         sys.exit(1)
 
     input_dir = path.cwd() if args.in_dir is None else path(args.in_dir)
-    output_dir = path(args.in_dir) if args.out_dir is None else path(args.out_dir)
+    output_dir = path(
+        args.in_dir) if args.out_dir is None else path(args.out_dir)
 
     top_lang = guess_lang(args.top)
     bot_lang = guess_lang(args.bot)
@@ -436,17 +475,25 @@ def run_dual(args):
 
     if in_files:
         for top_file in in_files:
-            bot_file = input_dir / path(top_file.name.replace(f".{top_lang}.{in_format}", f".{bot_lang}.{in_format}"))
+            bot_file = input_dir / \
+                path(top_file.name.replace(
+                    f".{top_lang}.{in_format}", f".{bot_lang}.{in_format}"))
 
-            data: str = top_file.read_text(encoding=guess_encoding(top_file), errors='ignore')
+            data: str = top_file.read_text(
+                encoding=guess_encoding(top_file), errors='ignore')
             subs_top = pysubs2.SSAFile.from_string(data)
-            data: str = bot_file.read_text(encoding=guess_encoding(bot_file), errors='ignore')
+            data: str = bot_file.read_text(
+                encoding=guess_encoding(bot_file), errors='ignore')
             subs_bot = pysubs2.SSAFile.from_string(data)
 
             subs = pysubs2.SSAFile()
             subs.styles = {
-                "bottom": pysubs2.SSAStyle(alignment=pysubs2.Alignment.BOTTOM_CENTER),
-                "top": pysubs2.SSAStyle(alignment=pysubs2.Alignment.TOP_CENTER),
+                "bottom": pysubs2.SSAStyle(fontname='DejaVu Sans Mono', fontsize=16, alignment=pysubs2.Alignment.BOTTOM_CENTER,
+                                        primarycolor=pysubs2.Color(0xDE, 0xB5, 0x6C), secondarycolor=pysubs2.Color(0, 0, 0, 0xF0),
+                                        outlinecolor=pysubs2.Color(0, 0, 0, 0x80), backcolor=pysubs2.Color(0x21, 0x4A, 0x93)),
+                "top": pysubs2.SSAStyle(fontname='sarasa-mono', fontsize=28, alignment=pysubs2.Alignment.TOP_CENTER,
+                                        primarycolor=pysubs2.Color(0xFF, 0xFF, 0xFF), secondarycolor=pysubs2.Color(0, 0, 0),
+                                        outlinecolor=pysubs2.Color(0, 0, 0), backcolor=pysubs2.Color(0, 0x80, 0xFF)),
             }
             for e in subs_bot:
                 e.style = "bottom"
@@ -455,11 +502,15 @@ def run_dual(args):
                 e.style = "top"
                 subs.append(e)
 
-            out_file = output_dir / path(top_file.name.replace(f".{top_lang}.{in_format}", f".{dual_lang}.srt"))
+            out_file = output_dir / \
+                path(top_file.name.replace(
+                    f".{top_lang}.{in_format}", f".{dual_lang}.srt"))
             out_file.parent.mkdir(exist_ok=True)
             subs.save(out_file, format_='srt')
             logger.info(f'Creating bilingual subtitles({out_file}) done.')
-            out_file = output_dir / path(top_file.name.replace(f".{top_lang}.{in_format}", f".{dual_lang}.ass"))
+            out_file = output_dir / \
+                path(top_file.name.replace(
+                    f".{top_lang}.{in_format}", f".{dual_lang}.ass"))
             subs.save(out_file, format_='ass')
             logger.info(f'Creating bilingual subtitles({out_file}) done.')
     else:
