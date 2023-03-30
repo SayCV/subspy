@@ -92,7 +92,7 @@ def _guess_media_filename_fields(filename: path, pattern=None):
     video_season = _fields[u'p_video_season']
     video_episode = _fields[u'p_video_episode']
     if u'p_video_episode_name' in _fields:
-        video_episode_name = _fields[u'p_video_episode_name']
+        video_episode_name = _fields[u'p_video_episode_name'].rstrip('.')
     else:
         video_episode_name = None
     if u'p_video_extra' in _fields:
