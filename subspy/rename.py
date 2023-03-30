@@ -3,6 +3,7 @@
 
 import logging
 import mimetypes
+import os
 import re
 import sys
 from pathlib import Path as path
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 filename_delims = '.- '
 
-default_filename_pattern = r"(?P<p_video_name>.*)[\.\- ]+[sS](?P<p_video_season>\d\d)[\.\- ]?[eE](?P<p_video_episode>\d\d)[\.\- ]?(?P<p_video_episode_name>[, \^:^!\w.\-\'\(\)]*)[\.\- ]+(?P<p_video_extra>\d{3,5}p.*)"
+default_filename_pattern = r"(?P<p_video_name>.*)[\.\- ]?[sS]*(?P<p_video_season>\d\d)[\.\- ]?[eE]*(?P<p_video_episode>\d\d)[\.\- ]?(?P<p_video_episode_name>[, \^:^!\w.\-\'\(\)]*)[\.\- ]?(?P<p_video_extra>\d{3,5}p.*)"
 
 default_filename_style = r"@VIDEO_NAME@.@VIDEO_SEASON@@VIDEO_EPISODE@.@VIDEO_EPISODE_NAME@.@VIDEO_EXTRA@"
 
@@ -74,6 +75,9 @@ def find_subtitle_files(directory: path, recursive=False):
 def _guess_media_filename_fields(filename: path, pattern=None):
     logger.debug(f'Processing: {filename.name}')
     pattern = default_filename_pattern if pattern is None else pattern
+    env_pattern = os.environ.get('TVS_FILENAME_PATTERN')
+    if env_pattern:
+        pattern = env_pattern
     logger.debug(f'Used pattern: {pattern}')
 
     regex = re.compile(pattern)
@@ -130,10 +134,11 @@ def guess_lang_from_subtitle(filename: path):
         en_count, zh_cn_count, zh_tw_count = count_characters_chinese_english(
             filename)
         lang = []
-        if zh_cn_count > 500:
-            lang.append('chs')
         if zh_tw_count > 100:
             lang.append('cht')
+        elif zh_cn_count > 500:
+            lang.append('chs')
+
         if en_count > 500:
             lang.append('eng')
         results = '+'.join(lang)
