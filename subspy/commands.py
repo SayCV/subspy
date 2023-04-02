@@ -209,7 +209,7 @@ def run_srt2ass(args):
                             _, zh_cn_count, zh_tw_count = count_characters_chinese_english_by_text(sen)
                             if idx == 0:
                                 _line = _line + sen
-                            elif zh_cn_count > 1 or zh_tw_count > 1:
+                            elif zh_cn_count >= 1 or zh_tw_count >= 1:
                                 _line = _line + '\\N' + sen
                             else:
                                 _line = _line + "\\N{" + r'\r' + f"{dual_lang[1].upper()}" + "}" + sen

@@ -13,7 +13,7 @@ from typing import Tuple
 import colorama
 import hanzidentifier
 
-from .util import guess_encoding
+from subspy.util import guess_encoding
 
 SUBSPY_ROOT = path(__file__).resolve().parent
 
