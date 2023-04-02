@@ -10,8 +10,8 @@ from pathlib import Path as path
 from pprint import pprint
 from typing import Dict, List
 
-from subspy.helpers import count_characters_chinese_english
-from subspy.util import guess_lang
+from .helper import count_characters_chinese_english
+from .util import guess_lang
 
 logger = logging.getLogger(__name__)
 

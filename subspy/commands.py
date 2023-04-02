@@ -9,11 +9,10 @@ from pathlib import Path as path
 import pysubs2
 from opencc import OpenCC
 
-from subspy import rename
-from subspy.helpers import (SUBSPY_ROOT, abbreviate_language,
-                            auto_add_fontsize_to_subs_textline)
-
+from . import rename
 from .exceptions import SubspyException
+from .helper import (SUBSPY_ROOT, abbreviate_language,
+                     auto_add_fontsize_to_subs_textline)
 from .util import filename_is_regex, guess_encoding, guess_lang
 
 logger = logging.getLogger(__name__)
@@ -489,8 +488,8 @@ def run_dual(args):
             subs = pysubs2.SSAFile()
             subs.styles = {
                 "bottom": pysubs2.SSAStyle(fontname='DejaVu Sans Mono', fontsize=16, alignment=pysubs2.Alignment.BOTTOM_CENTER,
-                                        primarycolor=pysubs2.Color(0xDE, 0xB5, 0x6C), secondarycolor=pysubs2.Color(0, 0, 0, 0xF0),
-                                        outlinecolor=pysubs2.Color(0, 0, 0, 0x80), backcolor=pysubs2.Color(0x21, 0x4A, 0x93)),
+                                           primarycolor=pysubs2.Color(0xDE, 0xB5, 0x6C), secondarycolor=pysubs2.Color(0, 0, 0, 0xF0),
+                                           outlinecolor=pysubs2.Color(0, 0, 0, 0x80), backcolor=pysubs2.Color(0x21, 0x4A, 0x93)),
                 "top": pysubs2.SSAStyle(fontname='sarasa-mono', fontsize=28, alignment=pysubs2.Alignment.TOP_CENTER,
                                         primarycolor=pysubs2.Color(0xFF, 0xFF, 0xFF), secondarycolor=pysubs2.Color(0, 0, 0),
                                         outlinecolor=pysubs2.Color(0, 0, 0), backcolor=pysubs2.Color(0, 0x80, 0xFF)),

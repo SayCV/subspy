@@ -3,19 +3,17 @@ Various helper functions that padsprod uses. Mostly for interacting with
 users in a nice way.
 """
 
-import argparse
-import binascii
+import functools
+import logging
 import math
-import string
 import sys
 from pathlib import Path as path
 from typing import Tuple
 
 import colorama
 import hanzidentifier
-import questionary
 
-from subspy.util import guess_encoding
+from .util import guess_encoding
 
 SUBSPY_ROOT = path(__file__).resolve().parent
 
@@ -76,6 +74,20 @@ SUPPORTED_LANGUAGES = [
     {"code": "SV", "language": "swe"},
 ]
 
+def logger_init(args=None):
+
+    # Setup logging for displaying background information to the user.
+    logging.basicConfig(
+        style="{", format="[{levelname:<7}] {message}", level=logging.INFO
+    )
+    # Add a custom status level for logging.
+    logging.addLevelName(25, "STATUS")
+    logging.Logger.status = functools.partialmethod(logging.Logger.log, 25)
+    logging.status = functools.partial(logging.log, 25)
+
+    # Change logging level if `--debug` was supplied.
+    if args and args.debug:
+        logging.getLogger("").setLevel(logging.DEBUG)
 
 def create_abbreviations_dictionary(languages=SUPPORTED_LANGUAGES):
     short_dict = {language["code"].lower(): language["code"]

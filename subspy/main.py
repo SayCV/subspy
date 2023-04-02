@@ -9,7 +9,6 @@ subspy class function.
 
 import argparse
 import atexit
-import functools
 import logging
 import re
 import sys
@@ -17,9 +16,10 @@ import sys
 import argcomplete
 from pysubs2 import make_time
 
-from subspy import commands, helpers
-from subspy._version import __version__
-from subspy.exceptions import SubspyException
+from . import commands
+from ._version import __version__
+from .exceptions import SubspyException
+from .helper import logger_init, set_terminal_title
 
 logger = logging.getLogger(__name__)
 
@@ -68,16 +68,7 @@ def main():
     """
 
     # Cleanup any title the program may set
-    atexit.register(helpers.set_terminal_title, "")
-
-    # Setup logging for displaying background information to the user.
-    logging.basicConfig(
-        style="{", format="[{levelname:<7}] {message}", level=logging.INFO
-    )
-    # Add a custom status level for logging what subspy is doing.
-    logging.addLevelName(25, "STATUS")
-    logging.Logger.status = functools.partialmethod(logging.Logger.log, 25)
-    logging.status = functools.partial(logging.log, 25)
+    atexit.register(set_terminal_title, "")
 
     # Create a common parent parser for arguments shared by all subparsers. In
     # practice there are very few of these since subspy supports a range of
@@ -309,9 +300,7 @@ def main():
         if getattr(args, key) != value:
             setattr(args, key, value)
 
-    # Change logging level if `--debug` was supplied.
-    if args.debug:
-        logging.getLogger("").setLevel(logging.DEBUG)
+    logger_init(args)
 
     # Handle deprecated arguments.
 

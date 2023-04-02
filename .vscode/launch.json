@@ -5,7 +5,7 @@
             "name": "Python: Test srt2ass",
             "type": "python",
             "request": "launch",
-            "program": "subspy/main.py",
+            "program": "test.py",
             "console": "integratedTerminal",
             "args": [
                 "srt2ass",
@@ -19,7 +19,7 @@
             "name": "Python: Test ass2srt",
             "type": "python",
             "request": "launch",
-            "program": "subspy/main.py",
+            "program": "test.py",
             "console": "integratedTerminal",
             "args": [
                 "srt2ass",
@@ -31,7 +31,7 @@
             "name": "Python: Test chs2cht",
             "type": "python",
             "request": "launch",
-            "program": "subspy/main.py",
+            "program": "test.py",
             "console": "integratedTerminal",
             "args": [
                 "chs2cht",
@@ -44,7 +44,7 @@
             "name": "Python: Test trans",
             "type": "python",
             "request": "launch",
-            "program": "subspy/main.py",
+            "program": "test.py",
             "console": "integratedTerminal",
             "args": [
                 "trans",
@@ -59,7 +59,7 @@
             "name": "Python: Test rename",
             "type": "python",
             "request": "launch",
-            "program": "subspy/main.py",
+            "program": "test.py",
             "console": "integratedTerminal",
             "args": [
                 "rename",
