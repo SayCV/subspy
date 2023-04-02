@@ -12,7 +12,7 @@ from opencc import OpenCC
 from . import rename
 from .exceptions import SubspyException
 from .helper import (SUBSPY_ROOT, abbreviate_language,
-                     auto_add_fontsize_to_subs_textline)
+                     auto_add_fontsize_to_subs_textline, count_characters_chinese_english_by_text)
 from .util import filename_is_regex, guess_encoding, guess_lang
 
 logger = logging.getLogger(__name__)
@@ -204,8 +204,17 @@ def run_srt2ass(args):
                     logger.info(f"Detected dual language: {in_lang}.")
                     lines = []
                     for line in data.split('\n'):
-                        lines.append(line.replace(
-                            '\\N', "\\N{" + r'\r' + f"{dual_lang[1].upper()}" + "}"))
+                        _line = ''
+                        for idx, sen in enumerate(line.split('\\N')):
+                            _, zh_cn_count, zh_tw_count = count_characters_chinese_english_by_text(sen)
+                            if idx == 0:
+                                _line = _line + sen
+                            elif zh_cn_count > 1 or zh_tw_count > 1:
+                                _line = _line + '\\N' + sen
+                            else:
+                                _line = _line + "\\N{" + r'\r' + f"{dual_lang[1].upper()}" + "}" + sen
+
+                        lines.append(_line)
                     out_file.write_text('\n'.join(lines), encoding=guess_encoding(
                         out_file), errors='ignore')
                 subs_fixed = pysubs2.load(

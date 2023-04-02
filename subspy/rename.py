@@ -10,7 +10,7 @@ from pathlib import Path as path
 from pprint import pprint
 from typing import Dict, List
 
-from .helper import count_characters_chinese_english
+from .helper import count_characters_chinese_english_by_file
 from .util import guess_lang
 
 logger = logging.getLogger(__name__)
@@ -131,7 +131,7 @@ def guess_lang_from_subtitle(filename: path):
 
     in_lang = guess_lang(filename.name)
     if in_lang is None:
-        en_count, zh_cn_count, zh_tw_count = count_characters_chinese_english(
+        en_count, zh_cn_count, zh_tw_count = count_characters_chinese_english_by_file(
             filename)
         lang = []
         if zh_tw_count > 100:
