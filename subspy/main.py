@@ -15,11 +15,11 @@ import sys
 
 import argcomplete
 from pysubs2 import make_time
+from subspy import helper
 
 from . import commands
 from ._version import __version__
 from .exceptions import SubspyException
-from .helper import logger_init, set_terminal_title
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,7 @@ def main():
     """
 
     # Cleanup any title the program may set
-    atexit.register(set_terminal_title, "")
+    atexit.register(helper.set_terminal_title, "")
 
     # Create a common parent parser for arguments shared by all subparsers. In
     # practice there are very few of these since subspy supports a range of
@@ -300,7 +300,7 @@ def main():
         if getattr(args, key) != value:
             setattr(args, key, value)
 
-    logger_init(args)
+    helper.logger_init(args)
 
     # Handle deprecated arguments.
 
