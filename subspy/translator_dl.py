@@ -5,9 +5,12 @@ import nltk
 
 
 class DeepLearningTranslator:
-    # facebook/m2m100_418M facebook/mbart-large-50-many-to-many-mmt
-    # "mbart50" or "m2m100"
-    def __init__(self, model="m2m100", device="auto"):
+    # model
+    #   facebook/m2m100_418M facebook/mbart-large-50-many-to-many-mmt
+    #   "mbart50" or "m2m100"
+    # device
+    #   "auto" "cpu" or "gpu"
+    def __init__(self, model="m2m100", device="gpu"):
         self.device = device
         self.model = model
         self.mt = dlt.TranslationModel(model_or_path=model, device=device)
