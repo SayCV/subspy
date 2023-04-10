@@ -15,11 +15,13 @@ class SubspyTranslator:
         return self.limit_of_length
 
     def _translate(self, query_text: str, translator: str, from_language: str, to_language: str) -> str:
-        result = ts.translate_text(query_text, translator, from_language, to_language)
+        result = ts.translate_text(
+            query_text, translator, from_language, to_language)
         return result
 
     def translate(self, text_list: list, translator: str, from_language: str, to_language: str) -> str:
-        result = self.translate_lines(text_list, translator, from_language, to_language)
+        result = self.translate_lines(
+            text_list, translator, from_language, to_language)
         return result
 
     def translate_lines(self, text_list: list, translator: str, from_language: str, to_language: str) -> str:
@@ -47,4 +49,3 @@ class SubspyTranslator:
         translated = translated.replace('\u6027\u4ea4', 'TMD')
         translated = translated.strip('\n')
         return translated
-

@@ -12,7 +12,8 @@ from opencc import OpenCC
 from . import rename
 from .exceptions import SubspyException
 from .helper import (SUBSPY_ROOT, abbreviate_language,
-                     auto_add_fontsize_to_subs_textline, count_characters_chinese_english_by_text)
+                     auto_add_fontsize_to_subs_textline,
+                     count_characters_chinese_english_by_text)
 from .util import filename_is_regex, guess_encoding, guess_lang
 
 logger = logging.getLogger(__name__)
@@ -248,7 +249,7 @@ def run_trans(args):
     # if args.output is None and args.out_dir is None:
     #    logger.error("Please provide output file!")
     #    sys.exit(1)
-    #output = path(args.output).absolute()
+    output = path(args.output).absolute() if args.output else None
 
     in_format = args.in_format
     if in_format is None:
@@ -272,7 +273,7 @@ def run_trans(args):
         in_lang = guess_lang(args.in_format)
 
     out_lang = args.out_lang
-    if out_lang is None:
+    if out_lang is None and output:
         out_lang = guess_lang(output.name)
     if out_lang is None:
         out_lang = guess_lang(args.out_format)
@@ -319,13 +320,19 @@ def run_trans(args):
             for event in subs.events:
                 text_list.append(event.plaintext.replace('\n', ' '))
 
-            from subspy.translator import SubspyTranslator
-            sts = SubspyTranslator()
+            sel = 2
+            if sel == 1:
+                from subspy.translator import SubspyTranslator
+                sts = SubspyTranslator()
+                from_language: str = abbreviate_language(in_lang, engine='')
+                to_language: str = abbreviate_language(out_lang, engine='')
+            else:
+                from subspy.translator_dl import DeepLearningTranslator
+                sts = DeepLearningTranslator()
+                from_language: str = in_lang
+                to_language: str = out_lang
 
             translator: str = args.trans_engine
-            from_language: str = abbreviate_language(in_lang, engine='')
-            to_language: str = abbreviate_language(out_lang, engine='')
-
             translated_sen = sts.translate(
                 text_list, translator, from_language, to_language)
             translated_sen_list = translated_sen.split('\n')
