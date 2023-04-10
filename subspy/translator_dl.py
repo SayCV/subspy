@@ -10,7 +10,7 @@ class DeepLearningTranslator:
     #   "mbart50" or "m2m100"
     # device
     #   "auto" "cpu" or "gpu"
-    def __init__(self, model="m2m100", device="gpu"):
+    def __init__(self, model="m2m100", device="auto"):
         self.device = device
         self.model = model
         self.mt = dlt.TranslationModel(model_or_path=model, device=device)
