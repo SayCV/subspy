@@ -326,7 +326,7 @@ def run_trans(args):
             both_subs = pysubs2.SSAFile.from_string(
                 data) if args.both else None
             for event in subs.events:
-                text_list.append(event.plaintext.replace('\n', ' '))
+                text_list.append(event.plaintext.lstrip(' ').lstrip('-').replace('\n', ' '))
 
             sel = 2 if args.trans_engine == 'dl' else 1
             if sel == 1:
