@@ -293,7 +293,9 @@ def run_trans(args):
                 in_files.append(in_file)
     else:
         in_files = [input]
+        input_dir = input.parent
 
+    stamp_str = []
     if in_files:
         total_start_time = time.time()
         for _file in in_files:
@@ -326,7 +328,7 @@ def run_trans(args):
             for event in subs.events:
                 text_list.append(event.plaintext.replace('\n', ' '))
 
-            sel = 2
+            sel = 2 if args.trans_engine == 'dl' else 1
             if sel == 1:
                 from subspy.translator import SubspyTranslator
                 sts = SubspyTranslator()
@@ -364,18 +366,17 @@ def run_trans(args):
                 both_subs.save(both_out_file, format_=out_format)
                 logger.info(f"Processed {both_out_file} done.")
             end_time = time.time()
-            times = round(end_time - start_time, 0)
-            stamp_outfile = path(out_file).with_suffix(f'.elapsed-seconds.{times}.txt')
-            stamp_outfile.write_text('')
+            times = round(end_time - start_time, None)
+            stamp_str.append(f'{_file.name:36} ... {times}')
         total_end_time = time.time()
-        times = round(total_end_time - total_start_time, 0)
-        stamp_outfile = output_dir / f'total-elapsed-seconds.{times}.txt'
-        stamp_outfile.write_text('')
+        times = round(total_end_time - total_start_time, None)
+        stamp_outfile = input_dir / f'elapsed-seconds-in-translation.txt'
+        stamp_str.append(f'---> Total elapsed seconds === {times}')
+        stamp_outfile.write_text('\n'.join(stamp_str))
     else:
         logger.info(f'Not found *.{in_lang}.{in_format} in {input_dir}.')
 
 # subspy rename --in-dir data
-
 
 def run_rename(args):
     logger.info(f"Rename Command Starting...")
