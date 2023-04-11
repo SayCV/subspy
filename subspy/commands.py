@@ -4,6 +4,7 @@
 
 import logging
 import sys
+import time
 from pathlib import Path as path
 
 import pysubs2
@@ -294,7 +295,9 @@ def run_trans(args):
         in_files = [input]
 
     if in_files:
+        total_start_time = time.time()
         for _file in in_files:
+            start_time = time.time()
             if in_lang is None:
                 output = _file.parent / \
                     _file.with_suffix(f".{out_lang}.{out_format}")
@@ -360,6 +363,14 @@ def run_trans(args):
                 both_out_file.parent.mkdir(exist_ok=True)
                 both_subs.save(both_out_file, format_=out_format)
                 logger.info(f"Processed {both_out_file} done.")
+            end_time = time.time()
+            times = round(end_time - start_time, 0)
+            stamp_outfile = path(out_file).with_suffix(f'.elapsed-seconds.{times}.txt')
+            stamp_outfile.write_text('')
+        total_end_time = time.time()
+        times = round(total_end_time - total_start_time, 0)
+        stamp_outfile = output_dir / f'total-elapsed-seconds.{times}.txt'
+        stamp_outfile.write_text('')
     else:
         logger.info(f'Not found *.{in_lang}.{in_format} in {input_dir}.')
 
