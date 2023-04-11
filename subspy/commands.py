@@ -367,7 +367,7 @@ def run_trans(args):
                 logger.info(f"Processed {both_out_file} done.")
             end_time = time.time()
             times = round(end_time - start_time, None)
-            stamp_str.append(f'{_file.name:36} ... {times}')
+            stamp_str.append(f'{_file.name:80} ... {times}')
         total_end_time = time.time()
         times = round(total_end_time - total_start_time, None)
         stamp_outfile = input_dir / f'elapsed-seconds-in-translation.txt'
