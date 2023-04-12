@@ -10,7 +10,7 @@ class DeepLearningTranslator:
     #   "mbart50" or "m2m100"
     # device
     #   "auto" "cpu" or "gpu"
-    def __init__(self, model="m2m100", device="auto"):
+    def __init__(self, model="mbart50", device="auto"):
         self.limit_of_length = 200
         self.device = device
         self.model = model
