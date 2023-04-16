@@ -100,6 +100,9 @@ def _guess_media_filename_fields(filename: path, pattern=None):
     else:
         video_extra = None
 
+    video_name = video_name.replace('-', '.')
+    video_episode_name = video_episode_name.replace('-', '.')
+    video_extra = video_extra.replace('-', '.')
     logger.debug(
         f'Succeeded to guess fields: {video_name},{video_season},{video_episode},{video_episode_name},{video_extra}')
     return (video_name, video_season, video_episode, video_episode_name, video_extra)
