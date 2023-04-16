@@ -322,6 +322,8 @@ def run(args, video_dir: path, subs_dir: path, recursive=False):
                 '@VIDEO_EPISODE@', 'E' + clz.video_episode[video_episode].number).replace(
                     '.@VIDEO_EPISODE_NAME@', '').replace(
                         '@VIDEO_EXTRA@', clz.video_episode[video_episode].extra)
+
+        _filename = re.sub(r'.(\d).(\d{3}p)', r'.\1\2', _filename)
         return _filename
 
     video_files: path = find_video_files(video_dir, recursive=False)
