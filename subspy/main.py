@@ -105,6 +105,10 @@ def main():
         help='Output directory',
         required=False
     )
+    parent.add_argument(
+        "--dry-run",
+        action="store_true"
+    )
 
     # Get the list of arguments before any command
     before_command_args = parent.parse_known_args()

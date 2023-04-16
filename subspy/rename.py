@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 filename_delims = '.- '
 
-default_filename_pattern = r"(?P<p_video_name>.*)[\.\- ]?[sS]*(?P<p_video_season>\d\d)[\.\- ]?[eE]*(?P<p_video_episode>\d\d)[\.\- ]?(?P<p_video_episode_name>[, \^:^!\w.\-\'\(\)]*)[\.\- ]?(?P<p_video_extra>\d{3,5}p.*)"
+default_filename_pattern = r"(?P<p_video_name>.*)[\.\- ]+[sS]?(?P<p_video_season>\d\d)[\.\- ]?[eE]?(?P<p_video_episode>\d\d)[\.\- ]?(?P<p_video_episode_name>[, \^:^!\w.\-\'\(\)]*)[\.\- ]+(?P<p_video_extra>\d{3,5}p.*)"
 
 default_filename_style = r"@VIDEO_NAME@.@VIDEO_SEASON@@VIDEO_EPISODE@.@VIDEO_EPISODE_NAME@.@VIDEO_EXTRA@"
 
@@ -119,12 +119,17 @@ def guess_fields_from_videos(directory: path, recursive=False):
 
 
 def guess_fields_from_subtitles(directory: path, recursive=False):
+    env_pattern = os.environ.get('SUBS_FILENAME_PATTERN')
+    pattern = None
+    if env_pattern:
+        pattern = env_pattern
+
     results = []
     subs_files = find_subtitle_files(directory, recursive=False)
 
     for filename in subs_files:
         video_name, video_season, video_episode, video_episode_name, video_extra = _guess_media_filename_fields(
-            filename)
+            filename, pattern)
         results.append((video_name, video_season, video_episode, video_episode_name, video_extra,
                        guess_lang_from_subtitle(filename)))
     return results
@@ -324,6 +329,7 @@ def run(args, video_dir: path, subs_dir: path, recursive=False):
                         '@VIDEO_EXTRA@', clz.video_episode[video_episode].extra)
 
         _filename = re.sub(r'.(\d).(\d{3}p)', r'.\1\2', _filename)
+        _filename = _filename.replace('..', '.')
         return _filename
 
     video_files: path = find_video_files(video_dir, recursive=False)
@@ -334,18 +340,25 @@ def run(args, video_dir: path, subs_dir: path, recursive=False):
         filename = f"{_filename.strip('.')}{file.suffix}"
         if file.name.lower() != filename.lower():
             print(f"{file.name} --> {filename}")
-            file.rename(path.joinpath(file.parent, f"{filename}"))
+            if not args.dry_run:
+                file.rename(path.joinpath(file.parent, f"{filename}"))
+
+    env_pattern = os.environ.get('SUBS_FILENAME_PATTERN')
+    pattern = None
+    if env_pattern:
+        pattern = env_pattern
 
     subs_files: path = find_subtitle_files(subs_dir, recursive=False)
     for file in subs_files:
         _, _, video_episode, _, _ = _guess_media_filename_fields(
-            file)
+            file, pattern)
         _lang = guess_lang_from_subtitle(file)
         _filename = _get_new_filename()
         filename = f"{_filename.strip('.')}.{_lang}{file.suffix}"
         if file.name.lower() != filename.lower():
             print(f"{file.name} --> {filename}")
-            file.rename(path.joinpath(file.parent, f"{filename}"))
+            if not args.dry_run:
+                file.rename(path.joinpath(file.parent, f"{filename}"))
 
 
 if __name__ == "__main__":
